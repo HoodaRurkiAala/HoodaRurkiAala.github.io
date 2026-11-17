@@ -1,10 +1,164 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Hooda Rurki Aala</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hooda Rurki Aala | Software Developer Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            color: #38bdf8;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #38bdf8;
+            color: #0f172a;
+            padding: 10px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background-color: #0284c7;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        section {
+            margin-bottom: 50px;
+        }
+        h2 {
+            font-size: 1.8rem;
+            color: #38bdf8;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 8px;
+        }
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .skill-tag {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            color: #38bdf8;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .card h3 {
+            color: #f8fafc;
+            margin-bottom: 10px;
+        }
+        .card p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+        .card a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: #1e293b;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #334155;
+        }
+    </style>
 </head>
-<body style="text-align: center; font-family: Arial; margin-top: 50px;">
-    <h1>Welcome to Hooda Rurki Aala's Website!</h1>
-    <p>My Official Website Is Coming Soon.</p>
+<body>
+
+    <header>
+        <h1>Hooda Rurki Aala</h1>
+        <p>Software Developer | Web Enthusiast | Open-Source Learner</p>
+        <a href="https://github.com" target="_blank" class="btn">Visit My GitHub</a>
+    </header>
+
+    <div class="container">
+        <section id="about">
+            <h2>About Me</h2>
+            <p>
+                Hello! I am a passionate software developer and tech enthusiast focused on building clean, responsive web applications and automation scripts. I enjoy exploring new programming languages, system administration tools, and contributing to open-source projects.
+            </p>
+        </section>
+
+        <section id="skills">
+            <h2>Technical Skills</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">HTML5 & CSS3</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">Git & GitHub</span>
+                <span class="skill-tag">Windows CLI / Batch Scripting</span>
+                <span class="skill-tag">Web Development</span>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Featured Projects</h2>
+            <div class="projects-grid">
+                <div class="card">
+                    <h3>Personal Portfolio Website</h3>
+                    <p>A fast, dark-themed responsive developer portfolio hosted on GitHub Pages to showcase projects and skills.</p>
+                    <a href="https://github.com.github.io" target="_blank">View Source Code →</a>
+                </div>
+                <div class="card">
+                    <h3>System Automation Scripts</h3>
+                    <p>A collection of useful Windows CMD and batch scripts designed to automate daily diagnostics and file management.</p>
+                    <a href="https://github.com" target="_blank">Explore on GitHub →</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
+    </footer>
+
 </body>
 </html>
