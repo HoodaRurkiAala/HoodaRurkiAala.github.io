@@ -1,10 +1,12 @@
-var ghBase = "https://" + "://github.com";
+// ====================== SAFE LINKS ======================
+var ghBase = "https://github.com/HoodaRurkiAala";
 document.getElementById("gh-btn").href = ghBase;
 document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
-document.getElementById("myForm").action = "https://" + "formsubmit.co/hoodarurkiaala@gmail.com";
+document.getElementById("myForm").action = "https://formsubmit.co/hoodarurkiaala@gmail.com";
 
-fetch("https://" + "api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
+// ====================== VISITOR COUNTER ======================
+fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
     .then(function(r) { return r.json(); })
     .then(function(d) {
         if (d && d.count) document.getElementById("visitor-count").innerText = d.count;
@@ -15,6 +17,7 @@ fetch("https://" + "api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
         document.getElementById("visitor-count").innerText = c;
     });
 
+// ====================== XOR ENCRYPTION ======================
 function xorText(str, pin) {
     var out = "";
     for (var i = 0; i < str.length; i++) {
@@ -23,11 +26,12 @@ function xorText(str, pin) {
     return out;
 }
 
+// ====================== SHOW QR ======================
 function showQR(fileUrl, fileName, resType, pin, status, btn) {
     var info = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
     var locked = btoa(encodeURIComponent(xorText(info, pin)));
     var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
-    var qrUrl = "https://" + "://qrserver.com" + "/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(finalLink);
+    var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(finalLink);
 
     document.getElementById("qr-image").src = qrUrl;
     document.getElementById("download-qr-btn").href = qrUrl;
@@ -38,6 +42,7 @@ function showQR(fileUrl, fileName, resType, pin, status, btn) {
     status.innerText = "✅ Done! Scan the QR code below.";
 }
 
+// ====================== BACKUP UPLOAD (Catbox) ======================
 function tryCatbox(file, pin, status, btn, cloudErr) {
     status.style.color = "#b45309";
     status.innerText = "⚠️ Cloudinary issue (" + cloudErr + "). Trying Backup Server...";
@@ -48,7 +53,7 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
     formData.append("fileToUpload", file);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://" + "litterbox.catbox.moe" + "/resources/internals/api.php", true);
+    xhr.open("POST", "https://litterbox.catbox.moe/resources/internals/api.php", true);
 
     xhr.onload = function() {
         var resText = (xhr.responseText || "").trim();
@@ -58,7 +63,7 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
             btn.disabled = false;
             btn.innerText = "Upload & Generate Secure QR";
             status.style.color = "#dc2626";
-            status.innerText = "❌ Both failed! Cloudinary: [" + cloudErr + "] | Backup: [" + xhr.status + " " + resText + "]";
+            status.innerText = "❌ Both failed! Cloudinary: [" + cloudErr + "] | Backup: [" + xhr.status + "]";
         }
     };
 
@@ -66,12 +71,13 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
         btn.disabled = false;
         btn.innerText = "Upload & Generate Secure QR";
         status.style.color = "#dc2626";
-        status.innerText = "❌ Network/CORS Blocked! Cloudinary: [" + cloudErr + "] | Backup: [Browser Blocked]";
+        status.innerText = "❌ Network/CORS Blocked!";
     };
 
     xhr.send(formData);
 }
 
+// ====================== MAIN UPLOAD FUNCTION ======================
 function startUpload() {
     var fileInput = document.getElementById("file-input");
     var pin = document.getElementById("secret-pin").value.trim();
@@ -93,8 +99,9 @@ function startUpload() {
     btn.disabled = true;
     btn.innerText = "Uploading...";
     status.style.color = "#047857";
-    status.innerText = "⏳ Connecting to Cloudinary (v3)...";
+    status.innerText = "⏳ Connecting to Cloudinary...";
 
+    // Detect resource type
     var resourceType = "raw";
     if (file.type.indexOf("image/") === 0) {
         resourceType = "image";
@@ -102,28 +109,29 @@ function startUpload() {
         resourceType = "video";
     }
 
-    var url = "https://" + "://cloudinary.com" + "/v1_1/ztpyye46/" + resourceType + "/upload";
+    // Correct Cloudinary endpoint
+    var url = "https://api.cloudinary.com/v1_1/ztpyye46/" + resourceType + "/upload";
     var formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "HoodaRurkiAala");
 
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
-    xhr.timeout = 12000;
+    xhr.timeout = 15000;
 
     xhr.upload.onprogress = function(e) {
         if (e.lengthComputable) {
             var percent = Math.round((e.loaded / e.total) * 100);
-            status.innerText = "⏳ Uploading to Cloudinary: " + percent + "%";
+            status.innerText = "⏳ Uploading: " + percent + "%";
         }
     };
 
     xhr.ontimeout = function() {
-        tryCatbox(file, pin, status, btn, "Timeout after 12s");
+        tryCatbox(file, pin, status, btn, "Timeout");
     };
 
     xhr.onerror = function() {
-        tryCatbox(file, pin, status, btn, "XHR Network/CORS Error");
+        tryCatbox(file, pin, status, btn, "Network Error");
     };
 
     xhr.onload = function() {
@@ -136,16 +144,20 @@ function startUpload() {
                 tryCatbox(file, pin, status, btn, msg);
             }
         } catch (err) {
-            tryCatbox(file, pin, status, btn, "Invalid JSON HTTP " + xhr.status);
+            tryCatbox(file, pin, status, btn, "Invalid Response");
         }
     };
 
     xhr.send(formData);
 }
 
+// ====================== UNLOCK SECTION ======================
 if (window.location.hash && window.location.hash.indexOf("#vault=") === 0) {
-    document.getElementById("unlock-section").style.display = "block";
-    document.getElementById("unlock-section").scrollIntoView({ behavior: "smooth" });
+    var unlockSection = document.getElementById("unlock-section");
+    if (unlockSection) {
+        unlockSection.style.display = "block";
+        unlockSection.scrollIntoView({ behavior: "smooth" });
+    }
 }
 
 function startUnlock() {
@@ -162,7 +174,7 @@ function startUnlock() {
         var fileData = JSON.parse(decoded);
         if (fileData && fileData.u && fileData.u.indexOf("http") === 0) {
             status.style.color = "#059669";
-            status.innerText = "✅ PIN Verified! Downloading original file...";
+            status.innerText = "✅ PIN Verified! Downloading...";
             var origUrl = fileData.u;
             if (fileData.t !== "raw" && origUrl.indexOf("cloudinary.com") !== -1) {
                 origUrl = fileData.u.split("/upload/").join("/upload/fl_attachment/");
