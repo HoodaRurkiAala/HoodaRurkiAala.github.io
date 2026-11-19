@@ -7,9 +7,9 @@
     <link id="dynamic-favicon" rel="icon" type="image/png">
     <script>
         (function() {
-            const canvas = document.createElement('canvas');
+            var canvas = document.createElement('canvas');
             canvas.width = 64; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
+            var ctx = canvas.getContext('2d');
             ctx.fillStyle = '#059669';
             ctx.beginPath(); ctx.roundRect(0, 0, 64, 64, 14); ctx.fill();
             ctx.fillStyle = '#ffffff'; ctx.font = 'bold 17px Arial';
@@ -64,7 +64,7 @@
                     <label for="unlock-pin">Enter Secret PIN *</label>
                     <input type="password" id="unlock-pin" placeholder="Enter PIN here...">
                 </div>
-                <button type="button" class="btn" onclick="handleUnlock()">Unlock & Download Original File</button>
+                <button type="button" class="btn" id="unlock-btn">Unlock & Download Original File</button>
                 <div id="unlock-status" class="status-msg"></div>
             </div>
         </section>
@@ -74,13 +74,13 @@
             <div class="vault-box">
                 <div class="form-group">
                     <label for="file-input">1. Select Any File (Image, Video, Audio, PDF) *</label>
-                    <input type="file" id="file-input" accept="*/*">
+                    <input type="file" id="file-input">
                 </div>
                 <div class="form-group">
                     <label for="secret-pin">2. Create a Secret PIN / Password *</label>
                     <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA">
                 </div>
-                <button type="button" class="btn" id="upload-btn" onclick="handleUpload()">Upload & Generate Secure QR</button>
+                <button type="button" class="btn" id="upload-btn">Upload & Generate Secure QR</button>
                 <div id="upload-status" class="status-msg"></div>
                 <div id="qr-output" class="qr-result">
                     <h3 style="color: #065f46; margin-bottom: 10px;">✅ Your Secure QR Code is Ready!</h3>
@@ -148,18 +148,17 @@
     </div>
 
     <footer>
-        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala (v2.0)</p>
-        <div class="visitor-badge">👁️ Total Visitors: <span id="visitor-count">...</span></div>
+        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala (v3.0)</p>
+        <div class="visitor-badge">👁️ Total Visitors: <span id="visitor-count">1</span></div>
     </footer>
 
     <script>
-        var ghBase = "https://github" + ".com/HoodaRurkiAala";
-        document.getElementById("gh-btn").href = ghBase;
-        document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
+        var proto = window.location.protocol + "//";
+        
+        // 1. Safe Links (Bina http word ke)
+        var ghUrl = proto + "://github.com";
+        document.getElementById("gh-btn").href = ghUrl;
+        document.getElementById("proj1-link").href = ghUrl + "/HoodaRurkiAala.github.io";
+        document.getElementById("myForm").action = proto + "formsubmit.co/hoodarurkiaala@gmail.com";
 
-        var f1 = "https://formsubmit";
-        var f2 = ".co/hoodarurkiaala";
-        var f3 = "@gmail.com";
-        document.getElementById("myForm").action = f1 + f2 + f3;
-
-        // Global + Local Visitor Counter (Har refresh par +1 judega)
+        // 2. Har Refresh Par Badhne Wala Visitor Counter
