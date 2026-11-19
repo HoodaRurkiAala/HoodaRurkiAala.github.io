@@ -16,8 +16,6 @@
         h2 { font-size: 1.8rem; color: #065f46; margin-bottom: 20px; border-bottom: 2px solid #d1fae5; padding-bottom: 8px; }
         .skills-grid { display: flex; flex-wrap: wrap; gap: 12px; }
         .skill-tag { background-color: #ecfdf5; border: 1px solid #6ee7b7; padding: 8px 18px; border-radius: 20px; font-size: 0.95rem; color: #065f46; font-weight: 600; }
-        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-        .card { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 24px; }
         .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 28px; max-width: 600px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; color: #065f46; font-weight: 600; }
@@ -48,7 +46,7 @@
         <section id="contact">
             <h2>Contact Me</h2>
             <div class="contact-form">
-                <form action="https://formsubmit.co" method="POST">
+                <form id="myForm" method="POST">
                     <input type="hidden" name="_subject" value="New Message from Hooda Rurki Aala Website!">
                     <input type="hidden" name="_captcha" value="false">
                     <div class="form-group">
@@ -71,5 +69,11 @@
     <footer>
         <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
     </footer>
+    <script>
+        var p1 = "https://formsubmit";
+        var p2 = ".co/hoodarurkiaala";
+        var p3 = "@gmail.com";
+        document.getElementById("myForm").action = p1 + p2 + p3;
+    </script>
 </body>
 </html>
