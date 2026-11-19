@@ -1,10 +1,10 @@
-var ghBase = "https://github.com";
+var ghBase = "https://" + "://github.com";
 document.getElementById("gh-btn").href = ghBase;
 document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
-document.getElementById("myForm").action = "https://formsubmit.co";
+document.getElementById("myForm").action = "https://" + "formsubmit.co/hoodarurkiaala@gmail.com";
 
-fetch("https://counterapi.dev")
+fetch("https://" + "api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
     .then(function(r) { return r.json(); })
     .then(function(d) {
         if (d && d.count) document.getElementById("visitor-count").innerText = d.count;
@@ -53,7 +53,7 @@ function startUpload() {
         resourceType = "video";
     }
 
-    var url = "https://cloudinary.com" + resourceType + "/upload";
+    var url = "https://" + "api.cloudinary.com" + "/v1_1/ztpyye46/" + resourceType + "/upload";
     var formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "HoodaRurkiAala");
@@ -77,7 +77,7 @@ function startUpload() {
                 var info = JSON.stringify({ u: data.secure_url, n: file.name, t: resourceType });
                 var locked = btoa(encodeURIComponent(xorText(info, pin)));
                 var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
-                var qrUrl = "https://qrserver.com" + encodeURIComponent(finalLink);
+                var qrUrl = "https://" + "://qrserver.com" + "/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(finalLink);
 
                 document.getElementById("qr-image").src = qrUrl;
                 document.getElementById("download-qr-btn").href = qrUrl;
