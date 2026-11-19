@@ -4,7 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hooda Rurki Aala | Software Developer Portfolio</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link id="dynamic-favicon" rel="icon" type="image/png">
+    <script>
+        (function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#059669';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 64, 64, 14);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 17px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('HOODA', 32, 34);
+            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
+        })();
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #ffffff; color: #1e293b; line-height: 1.6; }
