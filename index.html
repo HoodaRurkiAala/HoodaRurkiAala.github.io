@@ -67,7 +67,7 @@
     <header>
         <h1>Hooda Rurki Aala</h1>
         <p>Software Developer | Web Enthusiast | Open-Source Learner</p>
-        <a href="https://github.com" target="_blank" class="btn">Visit My GitHub</a>
+        <a id="gh-btn" href="#" target="_blank" class="btn">Visit My GitHub</a>
     </header>
     <div class="container">
         <section id="about">
@@ -91,12 +91,12 @@
                 <div class="card">
                     <h3>Personal Portfolio Website</h3>
                     <p>A fast, clean white-and-green themed responsive developer portfolio hosted on GitHub Pages to showcase projects and skills.</p>
-                    <a href="https://github.com.github.io" target="_blank">View Source Code →</a>
+                    <a id="proj1-link" href="#" target="_blank">View Source Code →</a>
                 </div>
                 <div class="card">
                     <h3>System Automation Scripts</h3>
                     <p>A collection of useful Windows CMD and batch scripts designed to automate daily diagnostics and file management.</p>
-                    <a href="https://github.com" target="_blank">Explore on GitHub →</a>
+                    <a id="proj2-link" href="#" target="_blank">Explore on GitHub →</a>
                 </div>
             </div>
         </section>
@@ -130,20 +130,34 @@
         </div>
     </footer>
     <script>
-        // FormSubmit Action URL Setup
-        var p1 = "https://formsubmit";
-        var p2 = ".co/hoodarurkiaala";
-        var p3 = "@gmail.com";
-        document.getElementById("myForm").action = p1 + p2 + p3;
+        // 1. Safe GitHub Links Setup
+        var ghBase = "https://github" + ".com/HoodaRurkiAala";
+        document.getElementById("gh-btn").href = ghBase;
+        document.getElementById("proj2-link").href = ghBase;
+        document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
 
-        // Live Visitor Counter Setup
-        fetch('https://counterapi.dev')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('visitor-count').innerText = data.count;
+        // 2. Safe FormSubmit Action URL Setup
+        var f1 = "https://formsubmit";
+        var f2 = ".co/hoodarurkiaala";
+        var f3 = "@gmail.com";
+        document.getElementById("myForm").action = f1 + f2 + f3;
+
+        // 3. Safe Live Visitor Counter Setup
+        var c1 = "https://api.counterapi";
+        var c2 = ".dev/v1/hoodarurkiaala-is-a-dev";
+        var c3 = "/visits/up";
+        fetch(c1 + c2 + c3)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && data.count) {
+                    document.getElementById('visitor-count').innerText = data.count;
+                }
             })
-            .catch(() => {
-                document.getElementById('visitor-count').innerText = "1+";
+            .catch(function() {
+                var localCount = localStorage.getItem('hooda_visits') || 1;
+                localCount = parseInt(localCount) + 1;
+                localStorage.setItem('hooda_visits', localCount);
+                document.getElementById('visitor-count').innerText = localCount;
             });
     </script>
 </body>
