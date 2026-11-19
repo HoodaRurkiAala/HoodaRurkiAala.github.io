@@ -12,58 +12,63 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            background-color: #06140e;
-            color: #ecfdf5;
+            background-color: #ffffff;
+            color: #1e293b;
             line-height: 1.6;
         }
         header {
-            background: linear-gradient(135deg, #0a2419, #06140e);
-            padding: 60px 20px;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            padding: 70px 20px;
             text-align: center;
-            border-bottom: 1px solid #14532d;
+            border-bottom: 2px solid #a7f3d0;
         }
         header h1 {
-            font-size: 2.5rem;
-            color: #10b981;
+            font-size: 2.6rem;
+            color: #065f46;
             margin-bottom: 10px;
         }
         header p {
-            font-size: 1.1rem;
-            color: #a7f3d0;
+            font-size: 1.15rem;
+            color: #047857;
             max-width: 600px;
-            margin: 0 auto 20px;
+            margin: 0 auto 24px;
+            font-weight: 500;
         }
         .btn {
             display: inline-block;
-            background-color: #10b981;
-            color: #06140e;
-            padding: 10px 24px;
-            border-radius: 6px;
+            background-color: #059669;
+            color: #ffffff;
+            padding: 12px 26px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: bold;
             border: none;
             cursor: pointer;
+            box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2);
             transition: background 0.3s, transform 0.2s;
         }
         .btn:hover {
-            background-color: #059669;
-            color: #ffffff;
+            background-color: #047857;
             transform: translateY(-2px);
         }
         .container {
             max-width: 900px;
-            margin: 40px auto;
+            margin: 50px auto;
             padding: 0 20px;
         }
         section {
-            margin-bottom: 50px;
+            margin-bottom: 55px;
         }
         h2 {
             font-size: 1.8rem;
-            color: #10b981;
+            color: #065f46;
             margin-bottom: 20px;
-            border-bottom: 2px solid #0f2e20;
+            border-bottom: 2px solid #d1fae5;
             padding-bottom: 8px;
+        }
+        #about p {
+            color: #334155;
+            font-size: 1.05rem;
         }
         .skills-grid {
             display: flex;
@@ -71,12 +76,13 @@
             gap: 12px;
         }
         .skill-tag {
-            background-color: #0a2419;
-            border: 1px solid #14532d;
-            padding: 8px 16px;
+            background-color: #ecfdf5;
+            border: 1px solid #6ee7b7;
+            padding: 8px 18px;
             border-radius: 20px;
             font-size: 0.95rem;
-            color: #34d399;
+            color: #065f46;
+            font-weight: 600;
         }
         .projects-grid {
             display: grid;
@@ -84,64 +90,77 @@
             gap: 20px;
         }
         .card {
-            background-color: #0a2419;
-            border: 1px solid #14532d;
-            border-radius: 8px;
-            padding: 20px;
+            background-color: #f8fafc;
+            border: 1px solid #d1fae5;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #10b981;
         }
         .card h3 {
-            color: #ecfdf5;
+            color: #065f46;
             margin-bottom: 10px;
         }
         .card p {
-            color: #a7f3d0;
+            color: #475569;
             font-size: 0.95rem;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         .card a {
-            color: #10b981;
+            color: #059669;
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+        }
+        .card a:hover {
+            text-decoration: underline;
         }
         .contact-form {
-            background-color: #0a2419;
-            border: 1px solid #14532d;
-            border-radius: 8px;
-            padding: 25px;
+            background-color: #f8fafc;
+            border: 1px solid #d1fae5;
+            border-radius: 10px;
+            padding: 28px;
             max-width: 600px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         .form-group label {
             display: block;
             margin-bottom: 6px;
-            color: #a7f3d0;
+            color: #065f46;
+            font-weight: 600;
             font-size: 0.95rem;
         }
         .form-group input,
         .form-group textarea {
             width: 100%;
             padding: 12px;
-            background-color: #06140e;
-            border: 1px solid #14532d;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
-            color: #ecfdf5;
+            color: #1e293b;
             font-size: 1rem;
         }
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #10b981;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
         }
         footer {
             text-align: center;
             padding: 30px 20px;
-            background-color: #0a2419;
-            color: #6ee7b7;
-            font-size: 0.9rem;
-            border-top: 1px solid #14532d;
+            background-color: #ecfdf5;
+            color: #065f46;
+            font-size: 0.95rem;
+            border-top: 1px solid #a7f3d0;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -178,7 +197,7 @@
             <div class="projects-grid">
                 <div class="card">
                     <h3>Personal Portfolio Website</h3>
-                    <p>A fast, dark-green themed responsive developer portfolio hosted on GitHub Pages to showcase projects and skills.</p>
+                    <p>A fast, clean white-and-green themed responsive developer portfolio hosted on GitHub Pages to showcase projects and skills.</p>
                     <a href="https://github.com.github.io" target="_blank">View Source Code →</a>
                 </div>
                 <div class="card">
