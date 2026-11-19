@@ -64,7 +64,7 @@
                     <label for="unlock-pin">Enter Secret PIN *</label>
                     <input type="password" id="unlock-pin" placeholder="Enter PIN here...">
                 </div>
-                <button type="button" class="btn" id="unlock-btn">Unlock & Download Original File</button>
+                <button type="button" class="btn" onclick="handleUnlock()">Unlock & Download Original File</button>
                 <div id="unlock-status" class="status-msg"></div>
             </div>
         </section>
@@ -80,7 +80,7 @@
                     <label for="secret-pin">2. Create a Secret PIN / Password *</label>
                     <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA">
                 </div>
-                <button type="button" class="btn" id="upload-btn">Upload & Generate Secure QR</button>
+                <button type="button" class="btn" id="upload-btn" onclick="handleUpload()">Upload & Generate Secure QR</button>
                 <div id="upload-status" class="status-msg"></div>
                 <div id="qr-output" class="qr-result">
                     <h3 style="color: #065f46; margin-bottom: 10px;">✅ Your Secure QR Code is Ready!</h3>
@@ -148,8 +148,8 @@
     </div>
 
     <footer>
-        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
-        <div class="visitor-badge">👁️ Total Views: <span id="visitor-count">1</span></div>
+        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala (v2.0)</p>
+        <div class="visitor-badge">👁️ Total Visitors: <span id="visitor-count">...</span></div>
     </footer>
 
     <script>
@@ -162,4 +162,4 @@
         var f3 = "@gmail.com";
         document.getElementById("myForm").action = f1 + f2 + f3;
 
-        var localVisits = parseInt(localStorage.getItem('hooda_page_views') || '0') + 1;
+        // Global + Local Visitor Counter (Har refresh par +1 judega)
