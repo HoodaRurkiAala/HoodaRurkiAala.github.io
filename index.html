@@ -15,21 +15,16 @@
         .container { max-width: 900px; margin: 50px auto; padding: 0 20px; }
         section { margin-bottom: 55px; }
         h2 { font-size: 1.8rem; color: #065f46; margin-bottom: 20px; border-bottom: 2px solid #d1fae5; padding-bottom: 8px; }
-        #about p { color: #334155; font-size: 1.05rem; }
         .skills-grid { display: flex; flex-wrap: wrap; gap: 12px; }
         .skill-tag { background-color: #ecfdf5; border: 1px solid #6ee7b7; padding: 8px 18px; border-radius: 20px; font-size: 0.95rem; color: #065f46; font-weight: 600; }
         .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-        .card { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); transition: transform 0.2s, border-color 0.2s; }
-        .card:hover { transform: translateY(-3px); border-color: #10b981; }
+        .card { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
         .card h3 { color: #065f46; margin-bottom: 10px; }
         .card p { color: #475569; font-size: 0.95rem; margin-bottom: 16px; }
-        .card a { color: #059669; text-decoration: none; font-weight: bold; font-size: 0.95rem; }
-        .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 28px; max-width: 600px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
+        .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 28px; max-width: 600px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; color: #065f46; font-weight: 600; font-size: 0.95rem; }
         .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; font-size: 1rem; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
-        #form-result { margin-top: 15px; font-weight: 600; font-size: 1rem; }
         footer { text-align: center; padding: 30px 20px; background-color: #ecfdf5; color: #065f46; font-size: 0.95rem; border-top: 1px solid #a7f3d0; font-weight: 500; }
     </style>
 </head>
@@ -53,31 +48,24 @@
                 <span class="skill-tag">Git & GitHub</span>
             </div>
         </section>
-        <section id="projects">
-            <h2>Featured Projects</h2>
-            <div class="projects-grid">
-                <div class="card">
-                    <h3>Personal Portfolio Website</h3>
-                    <p>A fast, clean white-and-green themed responsive developer portfolio.</p>
-                    <a href="https://github.com/HoodaRurkiAala.github.io" target="_blank">View Source Code →</a>
-                </div>
-            </div>
-        </section>
         <section id="contact">
             <h2>Contact Me</h2>
             <div class="contact-form">
-                <form id="contactForm">
+                <form action="https://web3forms.com" method="POST">
                     <input type="hidden" name="access_key" value="23cedadc-9f36-4827-8931-66c76cc792d3">
                     <div class="form-group">
-                        <label for="name">Your Name *</label>
+                        <label for="name">Your Name</label>
                         <input type="text" id="name" name="name" required>
                     </div>
                     <div class="form-group">
-                        <label for="message">Message *</label>
+                        <label for="email">Your Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
                         <textarea id="message" name="message" rows="4" required></textarea>
                     </div>
-                    <button type="submit" class="btn" id="submitBtn">Send Message</button>
-                    <div id="form-result"></div>
+                    <button type="submit" class="btn">Send Message</button>
                 </form>
             </div>
         </section>
@@ -85,39 +73,5 @@
     <footer>
         <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
     </footer>
-    <script>
-        const form = document.getElementById('contactForm');
-        const result = document.getElementById('form-result');
-        const submitBtn = document.getElementById('submitBtn');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Sending...";
-            result.style.color = "#047857";
-            result.innerText = "Please wait...";
-            const formData = new FormData(form);
-            fetch("https://web3forms.com", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(Object.fromEntries(formData))
-            }).then(async res => {
-                let json = await res.json();
-                if (res.status == 200) {
-                    result.style.color = "#059669";
-                    result.innerText = "✅ Message sent successfully!";
-                    form.reset();
-                } else {
-                    result.style.color = "#dc2626";
-                    result.innerText = "❌ " + json.message;
-                }
-            }).catch(() => {
-                result.style.color = "#dc2626";
-                result.innerText = "❌ Something went wrong! Please try again.";
-            }).finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Send Message";
-            });
-        });
-    </script>
 </body>
 </html>
