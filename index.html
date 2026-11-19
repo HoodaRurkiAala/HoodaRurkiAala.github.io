@@ -5,19 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hooda Rurki Aala | Software Developer & Secure QR Vault</title>
     <link id="dynamic-favicon" rel="icon" type="image/png">
-    <script>
-        (function() {
-            var canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
-            var ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#059669';
-            ctx.beginPath(); ctx.roundRect(0, 0, 64, 64, 14); ctx.fill();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 17px Arial';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('HOODA', 32, 34);
-            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
-        })();
-    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #ffffff; color: #1e293b; line-height: 1.6; }
@@ -53,7 +40,7 @@
     <header>
         <h1>Hooda Rurki Aala</h1>
         <p>Software Developer | Web Enthusiast | Secure File-to-QR Vault</p>
-        <a id="gh-btn" href="#" target="_blank" class="btn">Visit My GitHub</a>
+        <a href="https://github.com" target="_blank" class="btn">Visit My GitHub</a>
     </header>
     <div class="container">
         <section id="unlock-section" style="display: none;">
@@ -118,7 +105,7 @@
                 <div class="card">
                     <h3>Personal Developer Portfolio</h3>
                     <p>Fast, responsive white-and-green themed portfolio hosted on GitHub Pages with custom domain integration.</p>
-                    <a id="proj1-link" href="#" target="_blank">View Source Code →</a>
+                    <a href="https://github.com/HoodaRurkiAala.github.io" target="_blank">View Source Code →</a>
                 </div>
             </div>
         </section>
@@ -126,7 +113,7 @@
         <section id="contact">
             <h2>Contact Me</h2>
             <div class="contact-form">
-                <form id="myForm" method="POST">
+                <form action="https://formsubmit.co" method="POST">
                     <input type="hidden" name="_subject" value="New Message from Hooda Rurki Aala Website!">
                     <input type="hidden" name="_captcha" value="false">
                     <div class="form-group">
@@ -148,17 +135,29 @@
     </div>
 
     <footer>
-        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala (v3.0)</p>
+        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala (v4.0)</p>
         <div class="visitor-badge">👁️ Total Visitors: <span id="visitor-count">1</span></div>
     </footer>
 
     <script>
-        var proto = window.location.protocol + "//";
-        
-        // 1. Safe Links (Bina http word ke)
-        var ghUrl = proto + "://github.com";
-        document.getElementById("gh-btn").href = ghUrl;
-        document.getElementById("proj1-link").href = ghUrl + "/HoodaRurkiAala.github.io";
-        document.getElementById("myForm").action = proto + "formsubmit.co/hoodarurkiaala@gmail.com";
+        (function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#059669';
+            ctx.beginPath(); ctx.roundRect(0, 0, 64, 64, 14); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 17px Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('HOODA', 32, 34);
+            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
+        })();
 
-        // 2. Har Refresh Par Badhne Wala Visitor Counter
+        var countEl = document.getElementById('visitor-count');
+        var savedCount = parseInt(localStorage.getItem('hooda_v4_count') || '0') + 1;
+        localStorage.setItem('hooda_v4_count', savedCount);
+        countEl.innerText = savedCount;
+
+        fetch('https://counterapi.dev')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d && d.count) {
