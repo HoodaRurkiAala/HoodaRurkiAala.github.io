@@ -23,6 +23,64 @@ function xorText(str, pin) {
     return out;
 }
 
+function generateFinalQR(fileUrl, fileName, resType, pin, status, btn) {
+    var info = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
+    var locked = btoa(encodeURIComponent(xorText(info, pin)));
+    var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
+    var qrUrl = "https://" + "://qrserver.com" + "/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(finalLink);
+
+    document.getElementById("qr-image").src = qrUrl;
+    document.getElementById("download-qr-btn").href = qrUrl;
+    document.getElementById("qr-output").style.display = "block";
+    btn.disabled = false;
+    btn.innerText = "Upload & Generate Secure QR";
+    status.style.color = "#059669";
+    status.innerText = "✅ Done! Scan the QR code below.";
+}
+
+function uploadToBackupServer(file, pin, status, btn) {
+    status.style.color = "#047857";
+    status.innerText = "⏳ Switching to Backup Server (0%)...";
+    var formData = new FormData();
+    formData.append("file", file);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://" + "tmpfiles.org" + "/api/v1/upload", true);
+
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            var percent = Math.round((e.loaded / e.total) * 100);
+            status.innerText = "⏳ Uploading via Backup Server (" + percent + "%)...";
+        }
+    };
+
+    xhr.onload = function() {
+        try {
+            var res = JSON.parse(xhr.responseText);
+            if (xhr.status === 200 && res.data && res.data.url) {
+                var directUrl = res.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+                generateFinalQR(directUrl, file.name, "raw", pin, status, btn);
+            } else {
+                throw new Error("Backup failed");
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerText = "Upload & Generate Secure QR";
+            status.style.color = "#dc2626";
+            status.innerText = "❌ Upload Failed! Please check your internet connection.";
+        }
+    };
+
+    xhr.onerror = function() {
+        btn.disabled = false;
+        btn.innerText = "Upload & Generate Secure QR";
+        status.style.color = "#dc2626";
+        status.innerText = "❌ Network Error! Both servers unreachable.";
+    };
+
+    xhr.send(formData);
+}
+
 function startUpload() {
     var fileInput = document.getElementById("file-input");
     var pin = document.getElementById("secret-pin").value.trim();
@@ -53,7 +111,7 @@ function startUpload() {
         resourceType = "video";
     }
 
-    var url = "https://" + "api.cloudinary.com" + "/v1_1/ztpyye46/" + resourceType + "/upload";
+    var url = "https://" + "://cloudinary.com" + "/v1_1/ztpyye46/" + resourceType + "/upload";
     var formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "HoodaRurkiAala");
@@ -69,36 +127,20 @@ function startUpload() {
     };
 
     xhr.onload = function() {
-        btn.disabled = false;
-        btn.innerText = "Upload & Generate Secure QR";
         try {
             var data = JSON.parse(xhr.responseText);
             if (xhr.status === 200 && data.secure_url) {
-                var info = JSON.stringify({ u: data.secure_url, n: file.name, t: resourceType });
-                var locked = btoa(encodeURIComponent(xorText(info, pin)));
-                var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
-                var qrUrl = "https://" + "://qrserver.com" + "/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(finalLink);
-
-                document.getElementById("qr-image").src = qrUrl;
-                document.getElementById("download-qr-btn").href = qrUrl;
-                document.getElementById("qr-output").style.display = "block";
-                status.style.color = "#059669";
-                status.innerText = "✅ Done! Scan the QR code below.";
+                generateFinalQR(data.secure_url, file.name, resourceType, pin, status, btn);
             } else {
-                status.style.color = "#dc2626";
-                status.innerText = "❌ Cloudinary Error (" + xhr.status + "): " + (data.error ? data.error.message : "Upload failed");
+                uploadToBackupServer(file, pin, status, btn);
             }
         } catch (err) {
-            status.style.color = "#dc2626";
-            status.innerText = "❌ Server Response Error: " + xhr.status;
+            uploadToBackupServer(file, pin, status, btn);
         }
     };
 
     xhr.onerror = function() {
-        btn.disabled = false;
-        btn.innerText = "Upload & Generate Secure QR";
-        status.style.color = "#dc2626";
-        status.innerText = "❌ Connection Blocked! Check internet/VPN or file size (Max 10MB image / 100MB video).";
+        uploadToBackupServer(file, pin, status, btn);
     };
 
     xhr.send(formData);
@@ -125,7 +167,7 @@ function startUnlock() {
             status.style.color = "#059669";
             status.innerText = "✅ PIN Verified! Downloading original file...";
             var origUrl = fileData.u;
-            if (fileData.t !== "raw") {
+            if (fileData.t !== "raw" && origUrl.indexOf("cloudinary.com") !== -1) {
                 origUrl = fileData.u.split("/upload/").join("/upload/fl_attachment/");
             }
             var a = document.createElement("a");
