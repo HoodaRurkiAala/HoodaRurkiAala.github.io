@@ -40,7 +40,7 @@ function generateFinalQR(fileUrl, fileName, resType, pin, status, btn) {
 
 function uploadToBackupServer(file, pin, status, btn) {
     status.style.color = "#047857";
-    status.innerText = "⏳ Switching to Backup Server (0%)...";
+    status.innerText = "⏳ Uploading via Fast Server (0%)...";
     var formData = new FormData();
     formData.append("file", file);
 
@@ -50,7 +50,7 @@ function uploadToBackupServer(file, pin, status, btn) {
     xhr.upload.onprogress = function(e) {
         if (e.lengthComputable) {
             var percent = Math.round((e.loaded / e.total) * 100);
-            status.innerText = "⏳ Uploading via Backup Server (" + percent + "%)...";
+            status.innerText = "⏳ Uploading via Fast Server (" + percent + "%)...";
         }
     };
 
@@ -75,7 +75,7 @@ function uploadToBackupServer(file, pin, status, btn) {
         btn.disabled = false;
         btn.innerText = "Upload & Generate Secure QR";
         status.style.color = "#dc2626";
-        status.innerText = "❌ Network Error! Both servers unreachable.";
+        status.innerText = "❌ Network Error! Please check mobile data / Wi-Fi.";
     };
 
     xhr.send(formData);
@@ -118,29 +118,40 @@ function startUpload() {
 
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
+    xhr.timeout = 10000;
+
+    var switched = false;
+    function fallback() {
+        if (!switched) {
+            switched = true;
+            try { xhr.abort(); } catch (e) {}
+            uploadToBackupServer(file, pin, status, btn);
+        }
+    }
 
     xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
+        if (e.lengthComputable && e.loaded > 0) {
+            xhr.timeout = 0;
             var percent = Math.round((e.loaded / e.total) * 100);
             status.innerText = "⏳ Uploading original file (" + percent + "%), please wait...";
         }
     };
 
+    xhr.ontimeout = fallback;
+    xhr.onerror = fallback;
+
     xhr.onload = function() {
+        if (switched) return;
         try {
             var data = JSON.parse(xhr.responseText);
             if (xhr.status === 200 && data.secure_url) {
                 generateFinalQR(data.secure_url, file.name, resourceType, pin, status, btn);
             } else {
-                uploadToBackupServer(file, pin, status, btn);
+                fallback();
             }
         } catch (err) {
-            uploadToBackupServer(file, pin, status, btn);
+            fallback();
         }
-    };
-
-    xhr.onerror = function() {
-        uploadToBackupServer(file, pin, status, btn);
     };
 
     xhr.send(formData);
