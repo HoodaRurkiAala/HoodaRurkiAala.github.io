@@ -5,24 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hooda Rurki Aala | Software Developer Portfolio</title>
     <link id="dynamic-favicon" rel="icon" type="image/png">
-    <script>
-        (function() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 64;
-            canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#059669';
-            ctx.beginPath();
-            ctx.roundRect(0, 0, 64, 64, 14);
-            ctx.fill();
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 17px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('HOODA', 32, 34);
-            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
-        })();
-    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #ffffff; color: #1e293b; line-height: 1.6; }
@@ -43,29 +25,16 @@
         .skills-grid { display: flex; flex-wrap: wrap; gap: 12px; }
         .skill-tag { background-color: #ecfdf5; border: 1px solid #6ee7b7; padding: 8px 18px; border-radius: 20px; font-size: 0.95rem; color: #065f46; font-weight: 600; }
         .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-        .card { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); transition: transform 0.2s, border-color 0.2s; }
-        .card:hover { transform: translateY(-3px); border-color: #10b981; }
+        .card { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
         .card h3 { color: #065f46; margin-bottom: 10px; }
         .card p { color: #475569; font-size: 0.95rem; margin-bottom: 16px; }
         .card a { color: #059669; text-decoration: none; font-weight: bold; font-size: 0.95rem; }
-        .card a:hover { text-decoration: underline; }
-        .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 28px; max-width: 600px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
+        .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 28px; max-width: 600px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; color: #065f46; font-weight: 600; font-size: 0.95rem; }
         .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; font-size: 1rem; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
         footer { text-align: center; padding: 30px 20px; background-color: #ecfdf5; color: #065f46; font-size: 0.95rem; border-top: 1px solid #a7f3d0; font-weight: 500; }
-        .visitor-badge {
-            display: inline-block;
-            margin-top: 12px;
-            background-color: #059669;
-            color: #ffffff;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(5, 150, 105, 0.25);
-        }
+        .visitor-badge { display: inline-block; margin-top: 12px; background-color: #059669; color: #ffffff; padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -75,8 +44,6 @@
         <a id="gh-btn" href="#" target="_blank" class="btn">Visit My GitHub</a>
     </header>
     <div class="container">
-
-        <!-- UNLOCK SECTION (Jab koi QR scan karega tab dikhega) -->
         <section id="unlock-section" style="display: none;">
             <h2>🔓 Unlock & Download Original File</h2>
             <div class="vault-box">
@@ -85,12 +52,11 @@
                     <label for="unlock-pin">Enter Secret PIN *</label>
                     <input type="password" id="unlock-pin" placeholder="Enter PIN here...">
                 </div>
-                <button type="button" class="btn" onclick="unlockAndDownload()">Unlock & Download Original File</button>
+                <button type="button" class="btn" id="unlock-btn">Unlock & Download Original File</button>
                 <div id="unlock-status" class="status-msg"></div>
             </div>
         </section>
 
-        <!-- SECURE FILE-TO-QR LOCKER -->
         <section id="qr-locker">
             <h2>🔐 Secure File-to-QR Locker (Image, Video, Audio, PDF)</h2>
             <div class="vault-box">
@@ -103,7 +69,7 @@
                     <label for="secret-pin">2. Create a Secret PIN / Code *</label>
                     <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA">
                 </div>
-                <button type="button" class="btn" id="upload-btn" onclick="uploadFileAndMakeQR()">Upload & Generate Secure QR</button>
+                <button type="button" class="btn" id="upload-btn">Upload & Generate Secure QR</button>
                 <div id="upload-status" class="status-msg"></div>
                 <div id="qr-output" class="qr-result">
                     <h3 style="color: #065f46; margin-bottom: 10px;">✅ Your Secure QR Code is Ready!</h3>
@@ -116,7 +82,7 @@
 
         <section id="about">
             <h2>About Me</h2>
-            <p>Hello! I am a passionate software developer and tech enthusiast focused on building clean, responsive web applications and automation scripts. I enjoy exploring new programming languages, system administration tools, and contributing to open-source projects.</p>
+            <p>Hello! I am a passionate software developer and tech enthusiast focused on building clean, responsive web applications and automation scripts.</p>
         </section>
 
         <section id="skills">
@@ -127,7 +93,6 @@
                 <span class="skill-tag">Python</span>
                 <span class="skill-tag">Git & GitHub</span>
                 <span class="skill-tag">Windows CLI / Batch Scripting</span>
-                <span class="skill-tag">Web Development</span>
             </div>
         </section>
 
@@ -156,3 +121,36 @@
                     <div class="form-group">
                         <label for="name">Your Name *</label>
                         <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_info">Email or Phone Number (Optional)</label>
+                        <input type="text" id="contact_info" name="contact_info" placeholder="Enter email, phone, or leave blank">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
+        <div class="visitor-badge">
+            👁️ Total Visitors: <span id="visitor-count">Loading...</span>
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#059669';
+            ctx.beginPath(); ctx.roundRect(0, 0, 64, 64, 14); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 17px Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('HOODA', 32, 34);
+            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
