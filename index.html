@@ -12,40 +12,43 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            background-color: #0f172a;
-            color: #e2e8f0;
+            background-color: #06140e;
+            color: #ecfdf5;
             line-height: 1.6;
         }
         header {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: linear-gradient(135deg, #0a2419, #06140e);
             padding: 60px 20px;
             text-align: center;
-            border-bottom: 1px solid #334155;
+            border-bottom: 1px solid #14532d;
         }
         header h1 {
             font-size: 2.5rem;
-            color: #38bdf8;
+            color: #10b981;
             margin-bottom: 10px;
         }
         header p {
             font-size: 1.1rem;
-            color: #94a3b8;
+            color: #a7f3d0;
             max-width: 600px;
             margin: 0 auto 20px;
         }
         .btn {
             display: inline-block;
-            background-color: #38bdf8;
-            color: #0f172a;
+            background-color: #10b981;
+            color: #06140e;
             padding: 10px 24px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
-            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
         }
         .btn:hover {
-            background-color: #0284c7;
+            background-color: #059669;
             color: #ffffff;
+            transform: translateY(-2px);
         }
         .container {
             max-width: 900px;
@@ -57,9 +60,9 @@
         }
         h2 {
             font-size: 1.8rem;
-            color: #38bdf8;
+            color: #10b981;
             margin-bottom: 20px;
-            border-bottom: 2px solid #1e293b;
+            border-bottom: 2px solid #0f2e20;
             padding-bottom: 8px;
         }
         .skills-grid {
@@ -68,12 +71,12 @@
             gap: 12px;
         }
         .skill-tag {
-            background-color: #1e293b;
-            border: 1px solid #334155;
+            background-color: #0a2419;
+            border: 1px solid #14532d;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 0.95rem;
-            color: #38bdf8;
+            color: #34d399;
         }
         .projects-grid {
             display: grid;
@@ -81,33 +84,64 @@
             gap: 20px;
         }
         .card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
+            background-color: #0a2419;
+            border: 1px solid #14532d;
             border-radius: 8px;
             padding: 20px;
         }
         .card h3 {
-            color: #f8fafc;
+            color: #ecfdf5;
             margin-bottom: 10px;
         }
         .card p {
-            color: #94a3b8;
+            color: #a7f3d0;
             font-size: 0.95rem;
             margin-bottom: 15px;
         }
         .card a {
-            color: #38bdf8;
+            color: #10b981;
             text-decoration: none;
             font-weight: bold;
             font-size: 0.9rem;
         }
+        .contact-form {
+            background-color: #0a2419;
+            border: 1px solid #14532d;
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 600px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #a7f3d0;
+            font-size: 0.95rem;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #06140e;
+            border: 1px solid #14532d;
+            border-radius: 6px;
+            color: #ecfdf5;
+            font-size: 1rem;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+        }
         footer {
             text-align: center;
             padding: 30px 20px;
-            background-color: #1e293b;
-            color: #64748b;
+            background-color: #0a2419;
+            color: #6ee7b7;
             font-size: 0.9rem;
-            border-top: 1px solid #334155;
+            border-top: 1px solid #14532d;
         }
     </style>
 </head>
@@ -144,7 +178,7 @@
             <div class="projects-grid">
                 <div class="card">
                     <h3>Personal Portfolio Website</h3>
-                    <p>A fast, dark-themed responsive developer portfolio hosted on GitHub Pages to showcase projects and skills.</p>
+                    <p>A fast, dark-green themed responsive developer portfolio hosted on GitHub Pages to showcase projects and skills.</p>
                     <a href="https://github.com.github.io" target="_blank">View Source Code →</a>
                 </div>
                 <div class="card">
@@ -152,6 +186,30 @@
                     <p>A collection of useful Windows CMD and batch scripts designed to automate daily diagnostics and file management.</p>
                     <a href="https://github.com" target="_blank">Explore on GitHub →</a>
                 </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Contact Me</h2>
+            <div class="contact-form">
+                <form action="https://web3forms.com" method="POST">
+                    <input type="hidden" name="access_key" value="23cedadc-9f36-4827-8931-66c76cc792d3">
+                    <input type="hidden" name="subject" value="New Message from Hooda Rurki Aala Website">
+                    
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Your Email</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
             </div>
         </section>
     </div>
