@@ -50,6 +50,17 @@
         .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; font-size: 1rem; }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
         footer { text-align: center; padding: 30px 20px; background-color: #ecfdf5; color: #065f46; font-size: 0.95rem; border-top: 1px solid #a7f3d0; font-weight: 500; }
+        .visitor-badge {
+            display: inline-block;
+            margin-top: 12px;
+            background-color: #059669;
+            color: #ffffff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(5, 150, 105, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -114,12 +125,26 @@
     </div>
     <footer>
         <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
+        <div class="visitor-badge">
+            👁️ Total Visitors: <span id="visitor-count">Loading...</span>
+        </div>
     </footer>
     <script>
+        // FormSubmit Action URL Setup
         var p1 = "https://formsubmit";
         var p2 = ".co/hoodarurkiaala";
         var p3 = "@gmail.com";
         document.getElementById("myForm").action = p1 + p2 + p3;
+
+        // Live Visitor Counter Setup
+        fetch('https://counterapi.dev')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('visitor-count').innerText = data.count;
+            })
+            .catch(() => {
+                document.getElementById('visitor-count').innerText = "1+";
+            });
     </script>
 </body>
 </html>
