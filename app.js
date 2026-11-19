@@ -23,7 +23,7 @@ function xorText(str, pin) {
     return out;
 }
 
-function generateFinalQR(fileUrl, fileName, resType, pin, status, btn) {
+function showQR(fileUrl, fileName, resType, pin, status, btn) {
     var info = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
     var locked = btoa(encodeURIComponent(xorText(info, pin)));
     var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
@@ -38,36 +38,27 @@ function generateFinalQR(fileUrl, fileName, resType, pin, status, btn) {
     status.innerText = "✅ Done! Scan the QR code below.";
 }
 
-function uploadToBackupServer(file, pin, status, btn) {
-    status.style.color = "#047857";
-    status.innerText = "⏳ Uploading via Fast Server (0%)...";
+function tryCatbox(file, pin, status, btn, cloudErr) {
+    status.style.color = "#b45309";
+    status.innerText = "⚠️ Cloudinary issue (" + cloudErr + "). Trying Backup Server...";
+
     var formData = new FormData();
-    formData.append("file", file);
+    formData.append("reqtype", "fileupload");
+    formData.append("time", "72h");
+    formData.append("fileToUpload", file);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://" + "tmpfiles.org" + "/api/v1/upload", true);
-
-    xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-            var percent = Math.round((e.loaded / e.total) * 100);
-            status.innerText = "⏳ Uploading via Fast Server (" + percent + "%)...";
-        }
-    };
+    xhr.open("POST", "https://" + "litterbox.catbox.moe" + "/resources/internals/api.php", true);
 
     xhr.onload = function() {
-        try {
-            var res = JSON.parse(xhr.responseText);
-            if (xhr.status === 200 && res.data && res.data.url) {
-                var directUrl = res.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
-                generateFinalQR(directUrl, file.name, "raw", pin, status, btn);
-            } else {
-                throw new Error("Backup failed");
-            }
-        } catch (err) {
+        var resText = (xhr.responseText || "").trim();
+        if (xhr.status === 200 && resText.indexOf("https://") === 0) {
+            showQR(resText, file.name, "raw", pin, status, btn);
+        } else {
             btn.disabled = false;
             btn.innerText = "Upload & Generate Secure QR";
             status.style.color = "#dc2626";
-            status.innerText = "❌ Upload Failed! Please check your internet connection.";
+            status.innerText = "❌ Both failed! Cloudinary: [" + cloudErr + "] | Backup: [" + xhr.status + " " + resText + "]";
         }
     };
 
@@ -75,7 +66,7 @@ function uploadToBackupServer(file, pin, status, btn) {
         btn.disabled = false;
         btn.innerText = "Upload & Generate Secure QR";
         status.style.color = "#dc2626";
-        status.innerText = "❌ Network Error! Please check mobile data / Wi-Fi.";
+        status.innerText = "❌ Network/CORS Blocked! Cloudinary: [" + cloudErr + "] | Backup: [Browser Blocked]";
     };
 
     xhr.send(formData);
@@ -102,7 +93,7 @@ function startUpload() {
     btn.disabled = true;
     btn.innerText = "Uploading...";
     status.style.color = "#047857";
-    status.innerText = "⏳ Uploading original file (0%), please wait...";
+    status.innerText = "⏳ Connecting to Cloudinary (v3)...";
 
     var resourceType = "raw";
     if (file.type.indexOf("image/") === 0) {
@@ -118,39 +109,34 @@ function startUpload() {
 
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
-    xhr.timeout = 10000;
-
-    var switched = false;
-    function fallback() {
-        if (!switched) {
-            switched = true;
-            try { xhr.abort(); } catch (e) {}
-            uploadToBackupServer(file, pin, status, btn);
-        }
-    }
+    xhr.timeout = 12000;
 
     xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable && e.loaded > 0) {
-            xhr.timeout = 0;
+        if (e.lengthComputable) {
             var percent = Math.round((e.loaded / e.total) * 100);
-            status.innerText = "⏳ Uploading original file (" + percent + "%), please wait...";
+            status.innerText = "⏳ Uploading to Cloudinary: " + percent + "%";
         }
     };
 
-    xhr.ontimeout = fallback;
-    xhr.onerror = fallback;
+    xhr.ontimeout = function() {
+        tryCatbox(file, pin, status, btn, "Timeout after 12s");
+    };
+
+    xhr.onerror = function() {
+        tryCatbox(file, pin, status, btn, "XHR Network/CORS Error");
+    };
 
     xhr.onload = function() {
-        if (switched) return;
         try {
             var data = JSON.parse(xhr.responseText);
             if (xhr.status === 200 && data.secure_url) {
-                generateFinalQR(data.secure_url, file.name, resourceType, pin, status, btn);
+                showQR(data.secure_url, file.name, resourceType, pin, status, btn);
             } else {
-                fallback();
+                var msg = (data && data.error && data.error.message) ? data.error.message : ("HTTP " + xhr.status);
+                tryCatbox(file, pin, status, btn, msg);
             }
         } catch (err) {
-            fallback();
+            tryCatbox(file, pin, status, btn, "Invalid JSON HTTP " + xhr.status);
         }
     };
 
