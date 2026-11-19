@@ -5,24 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hooda Rurki Aala | Software Developer & Secure QR Vault</title>
     <link id="dynamic-favicon" rel="icon" type="image/png">
+    <script>
+        (function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#059669';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 64, 64, 14);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 17px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('HOODA', 32, 34);
+            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
+        })();
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #ffffff; color: #1e293b; line-height: 1.6; }
-        header { background: linear-gradient(135deg, #ecfdf5, #d1fae5); padding: 55px 20px; text-align: center; border-bottom: 2px solid #a7f3d0; }
-        header h1 { font-size: 2.4rem; color: #065f46; margin-bottom: 8px; }
+        header { background: linear-gradient(135deg, #ecfdf5, #d1fae5); padding: 60px 20px; text-align: center; border-bottom: 2px solid #a7f3d0; }
+        header h1 { font-size: 2.5rem; color: #065f46; margin-bottom: 8px; }
         header p { font-size: 1.1rem; color: #047857; max-width: 600px; margin: 0 auto 20px; font-weight: 500; }
-        .btn { display: inline-block; background-color: #059669; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); transition: 0.2s; }
-        .btn:hover { background-color: #047857; }
-        .btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .btn { display: inline-block; background-color: #059669; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); transition: background 0.3s, transform 0.2s; }
+        .btn:hover { background-color: #047857; transform: translateY(-2px); }
+        .btn:disabled { background-color: #94a3b8; cursor: not-allowed; transform: none; }
         .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-        section { margin-bottom: 45px; }
-        h2 { font-size: 1.7rem; color: #065f46; margin-bottom: 16px; border-bottom: 2px solid #d1fae5; padding-bottom: 8px; }
-        .vault-box { background-color: #f0fdf4; border: 2px solid #6ee7b7; border-radius: 12px; padding: 25px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 6px; color: #065f46; font-weight: 600; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; }
-        .status-msg { margin-top: 14px; font-weight: 600; font-size: 0.98rem; }
-        .qr-result { margin-top: 20px; text-align: center; background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #a7f3d0; display: none; }
+        section { margin-bottom: 50px; }
+        h2 { font-size: 1.75rem; color: #065f46; margin-bottom: 18px; border-bottom: 2px solid #d1fae5; padding-bottom: 8px; }
+        .vault-box { background-color: #f0fdf4; border: 2px solid #6ee7b7; border-radius: 12px; padding: 28px; box-shadow: 0 6px 16px rgba(5, 150, 105, 0.08); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; color: #065f46; font-weight: 600; font-size: 0.95rem; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; font-size: 1rem; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
+        .status-msg { margin-top: 14px; font-weight: 600; font-size: 0.98rem; color: #047857; }
+        .qr-result { margin-top: 22px; text-align: center; background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #a7f3d0; display: none; }
         .qr-result img { max-width: 220px; border: 4px solid #ecfdf5; border-radius: 8px; margin-bottom: 12px; }
         .skills-grid { display: flex; flex-wrap: wrap; gap: 10px; }
         .skill-tag { background-color: #ecfdf5; border: 1px solid #6ee7b7; padding: 7px 16px; border-radius: 20px; font-size: 0.92rem; color: #065f46; font-weight: 600; }
@@ -31,58 +50,67 @@
         .card h3 { color: #065f46; margin-bottom: 8px; }
         .card p { color: #475569; font-size: 0.95rem; margin-bottom: 14px; }
         .card a { color: #059669; text-decoration: none; font-weight: bold; }
-        .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 25px; max-width: 600px; }
-        footer { text-align: center; padding: 28px 20px; background-color: #ecfdf5; color: #065f46; font-size: 0.95rem; border-top: 1px solid #a7f3d0; }
+        .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 26px; max-width: 600px; }
+        footer { text-align: center; padding: 28px 20px; background-color: #ecfdf5; color: #065f46; font-size: 0.95rem; border-top: 1px solid #a7f3d0; font-weight: 500; }
         .visitor-badge { display: inline-block; margin-top: 10px; background-color: #059669; color: #ffffff; padding: 6px 16px; border-radius: 20px; font-size: 0.88rem; font-weight: bold; }
     </style>
 </head>
 <body>
+
     <header>
         <h1>Hooda Rurki Aala</h1>
         <p>Software Developer | Web Enthusiast | Secure File-to-QR Vault</p>
-        <a href="https://github.com" target="_blank" class="btn">Visit My GitHub</a>
+        <a id="gh-btn" href="#" target="_blank" class="btn">Visit My GitHub</a>
     </header>
+
     <div class="container">
+
+        <!-- UNLOCK SECTION (Visible only when someone scans a QR code) -->
         <section id="unlock-section" style="display: none;">
             <h2>🔓 Unlock & Download Original File</h2>
             <div class="vault-box">
-                <p style="margin-bottom: 14px; color: #065f46;">Enter the Secret PIN to unlock and download the original file.</p>
+                <p style="margin-bottom: 15px; color: #065f46;">This file is protected. Enter the Secret PIN to unlock and download it in 100% original quality.</p>
                 <div class="form-group">
-                    <label for="unlock-pin">Enter Secret PIN *</label>
+                    <label for="unlock-pin">Enter Secret PIN / Code *</label>
                     <input type="password" id="unlock-pin" placeholder="Enter PIN here...">
                 </div>
-                <button type="button" class="btn" id="unlock-btn">Unlock & Download Original File</button>
+                <button type="button" class="btn" onclick="unlockFile()">Unlock & Download Original File</button>
                 <div id="unlock-status" class="status-msg"></div>
             </div>
         </section>
 
+        <!-- UPLOAD & QR GENERATOR SECTION -->
         <section id="qr-locker">
             <h2>🔐 Secure File-to-QR Locker (Image, Video, Audio, PDF)</h2>
             <div class="vault-box">
+                <p style="margin-bottom: 16px; color: #334155;">Upload any file in original quality and set a Secret PIN. Scanning the QR code will require that PIN to download the exact file.</p>
                 <div class="form-group">
-                    <label for="file-input">1. Select Any File (Image, Video, Audio, PDF) *</label>
-                    <input type="file" id="file-input">
+                    <label for="file-input">1. Select Any File (Image, Video, Audio, Document) *</label>
+                    <input type="file" id="file-input" accept="*/*">
                 </div>
                 <div class="form-group">
                     <label for="secret-pin">2. Create a Secret PIN / Password *</label>
                     <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA">
                 </div>
-                <button type="button" class="btn" id="upload-btn">Upload & Generate Secure QR</button>
+                <button type="button" class="btn" id="upload-btn" onclick="uploadAndGenerateQR()">Upload & Generate Secure QR</button>
                 <div id="upload-status" class="status-msg"></div>
+
                 <div id="qr-output" class="qr-result">
                     <h3 style="color: #065f46; margin-bottom: 10px;">✅ Your Secure QR Code is Ready!</h3>
                     <img id="qr-image" src="" alt="Secure QR Code">
-                    <p style="font-size: 0.9rem; color: #475569; margin-bottom: 12px;">Scan this QR with any phone and enter your PIN to download the original file.</p>
+                    <p style="font-size: 0.9rem; color: #475569; margin-bottom: 12px;">Scan this QR with any phone camera and enter your PIN to download the original file.</p>
                     <a id="download-qr-btn" href="#" download="Hooda-Secure-QR.png" class="btn" style="padding: 8px 18px; font-size: 0.9rem;">Download QR Image</a>
                 </div>
             </div>
         </section>
 
+        <!-- ABOUT SECTION -->
         <section id="about">
             <h2>About Me</h2>
-            <p>Hello! I am a passionate software developer and tech enthusiast focused on building clean, responsive web applications and browser-based security utilities.</p>
+            <p>Hello! I am a passionate software developer and tech enthusiast focused on building clean, responsive web applications, automation scripts, and browser-based security utilities.</p>
         </section>
 
+        <!-- SKILLS SECTION -->
         <section id="skills">
             <h2>Technical Skills</h2>
             <div class="skills-grid">
@@ -91,9 +119,11 @@
                 <span class="skill-tag">Python</span>
                 <span class="skill-tag">Git & GitHub</span>
                 <span class="skill-tag">Windows CLI / Batch Scripting</span>
+                <span class="skill-tag">Cloud APIs</span>
             </div>
         </section>
 
+        <!-- PROJECTS SECTION -->
         <section id="projects">
             <h2>Featured Projects</h2>
             <div class="projects-grid">
@@ -105,15 +135,16 @@
                 <div class="card">
                     <h3>Personal Developer Portfolio</h3>
                     <p>Fast, responsive white-and-green themed portfolio hosted on GitHub Pages with custom domain integration.</p>
-                    <a href="https://github.com/HoodaRurkiAala.github.io" target="_blank">View Source Code →</a>
+                    <a id="proj1-link" href="#" target="_blank">View Source Code →</a>
                 </div>
             </div>
         </section>
 
+        <!-- CONTACT SECTION -->
         <section id="contact">
             <h2>Contact Me</h2>
             <div class="contact-form">
-                <form action="https://formsubmit.co" method="POST">
+                <form id="myForm" method="POST">
                     <input type="hidden" name="_subject" value="New Message from Hooda Rurki Aala Website!">
                     <input type="hidden" name="_captcha" value="false">
                     <div class="form-group">
@@ -126,38 +157,3 @@
                     </div>
                     <div class="form-group">
                         <label for="message">Message *</label>
-                        <textarea id="message" name="message" rows="4" placeholder="Write your message here..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn">Send Message</button>
-                </form>
-            </div>
-        </section>
-    </div>
-
-    <footer>
-        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala (v4.0)</p>
-        <div class="visitor-badge">👁️ Total Visitors: <span id="visitor-count">1</span></div>
-    </footer>
-
-    <script>
-        (function() {
-            var canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
-            var ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#059669';
-            ctx.beginPath(); ctx.roundRect(0, 0, 64, 64, 14); ctx.fill();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 17px Arial';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('HOODA', 32, 34);
-            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
-        })();
-
-        var countEl = document.getElementById('visitor-count');
-        var savedCount = parseInt(localStorage.getItem('hooda_v4_count') || '0') + 1;
-        localStorage.setItem('hooda_v4_count', savedCount);
-        countEl.innerText = savedCount;
-
-        fetch('https://counterapi.dev')
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                if (d && d.count) {
