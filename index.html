@@ -1,52 +1,164 @@
-<section id="vault">
-    <h2>🔐 Secure File-to-QR Locker</h2>
-    <div class="vault-box">
-
-        <!-- UPLOAD PART -->
-        <div class="form-group">
-            <label for="file-input">1. Select Any File (Image, Video, Audio, PDF) *</label>
-            <input type="file" id="file-input">
-        </div>
-        <div class="form-group">
-            <label for="secret-pin">2. Create a Secret PIN *</label>
-            <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA" maxlength="20">
-        </div>
-        <button type="button" class="btn" id="upload-btn" onclick="startUpload()">Upload & Generate Secure QR</button>
-        <div id="upload-status" class="status-msg"></div>
-
-        <!-- RESULT (QR + LINK) -->
-        <div id="qr-output" class="qr-result" style="display:none; margin-top:25px;">
-            <h3 style="color:#065f46; margin-bottom:12px;">✅ Your Secure File is Ready!</h3>
-            
-            <img id="qr-image" src="" alt="Secure QR Code" style="max-width:280px; border-radius:8px;">
-            
-            <p style="margin:15px 0 8px; font-weight:600; color:#065f46;">Vault Link (Copy this for PC):</p>
-            <input type="text" id="vault-link-text" readonly 
-                   style="width:100%; padding:10px; font-size:0.85rem; border:1px solid #a7f3d0; border-radius:6px; background:#f0fdf4;">
-            
-            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-                <button type="button" class="btn" id="copy-link-btn" onclick="copyVaultLink()" style="padding:8px 16px; font-size:0.9rem;">Copy Vault Link</button>
-                <a id="download-qr-btn" href="#" download="Hooda-Secure-QR.png" class="btn" style="padding:8px 16px; font-size:0.9rem;">Download QR</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hooda Rurki Aala | Software Developer Portfolio</title>
+    <link id="dynamic-favicon" rel="icon" type="image/png">
+    <script>
+        (function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#059669';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 64, 64, 14);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 17px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('HOODA', 32, 34);
+            document.getElementById('dynamic-favicon').href = canvas.toDataURL('image/png');
+        })();
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #ffffff; color: #1e293b; line-height: 1.6; }
+        header { background: linear-gradient(135deg, #ecfdf5, #d1fae5); padding: 70px 20px; text-align: center; border-bottom: 2px solid #a7f3d0; }
+        header h1 { font-size: 2.6rem; color: #065f46; margin-bottom: 10px; }
+        header p { font-size: 1.15rem; color: #047857; max-width: 600px; margin: 0 auto 24px; font-weight: 500; }
+        .btn { display: inline-block; background-color: #059669; color: #ffffff; padding: 12px 26px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); transition: background 0.3s, transform 0.2s; }
+        .btn:hover { background-color: #047857; transform: translateY(-2px); }
+        .container { max-width: 900px; margin: 50px auto; padding: 0 20px; }
+        section { margin-bottom: 55px; }
+        h2 { font-size: 1.8rem; color: #065f46; margin-bottom: 20px; border-bottom: 2px solid #d1fae5; padding-bottom: 8px; }
+        #about p { color: #334155; font-size: 1.05rem; }
+        .skills-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+        .skill-tag { background-color: #ecfdf5; border: 1px solid #6ee7b7; padding: 8px 18px; border-radius: 20px; font-size: 0.95rem; color: #065f46; font-weight: 600; }
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .card { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); transition: transform 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-3px); border-color: #10b981; }
+        .card h3 { color: #065f46; margin-bottom: 10px; }
+        .card p { color: #475569; font-size: 0.95rem; margin-bottom: 16px; }
+        .card a { color: #059669; text-decoration: none; font-weight: bold; font-size: 0.95rem; }
+        .card a:hover { text-decoration: underline; }
+        .contact-form { background-color: #f8fafc; border: 1px solid #d1fae5; border-radius: 10px; padding: 28px; max-width: 600px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; color: #065f46; font-weight: 600; font-size: 0.95rem; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; font-size: 1rem; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
+        footer { text-align: center; padding: 30px 20px; background-color: #ecfdf5; color: #065f46; font-size: 0.95rem; border-top: 1px solid #a7f3d0; font-weight: 500; }
+        .visitor-badge {
+            display: inline-block;
+            margin-top: 12px;
+            background-color: #059669;
+            color: #ffffff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(5, 150, 105, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Hooda Rurki Aala</h1>
+        <p>Software Developer | Web Enthusiast | Open-Source Learner</p>
+        <a id="gh-btn" href="#" target="_blank" class="btn">Visit My GitHub</a>
+    </header>
+    <div class="container">
+        <section id="about">
+            <h2>About Me</h2>
+            <p>Hello! I am a passionate software developer and tech enthusiast focused on building clean, responsive web applications and automation scripts. I enjoy exploring new programming languages, system administration tools, and contributing to open-source projects.</p>
+        </section>
+        <section id="skills">
+            <h2>Technical Skills</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">HTML5 & CSS3</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">Git & GitHub</span>
+                <span class="skill-tag">Windows CLI / Batch Scripting</span>
+                <span class="skill-tag">Web Development</span>
             </div>
-        </div>
+        </section>
+        <section id="projects">
+            <h2>Featured Projects</h2>
+            <div class="projects-grid">
+                <div class="card">
+                    <h3>Personal Portfolio Website</h3>
+                    <p>A fast, clean white-and-green themed responsive developer portfolio hosted on GitHub Pages to showcase projects and skills.</p>
+                    <a id="proj1-link" href="#" target="_blank">View Source Code →</a>
+                </div>
+                <div class="card">
+                    <h3>System Automation Scripts</h3>
+                    <p>A collection of useful Windows CMD and batch scripts designed to automate daily diagnostics and file management.</p>
+                    <a id="proj2-link" href="#" target="_blank">Explore on GitHub →</a>
+                </div>
+            </div>
+        </section>
+        <section id="contact">
+            <h2>Contact Me</h2>
+            <div class="contact-form">
+                <form id="myForm" method="POST">
+                    <input type="hidden" name="_subject" value="New Message from Hooda Rurki Aala Website!">
+                    <input type="hidden" name="_captcha" value="false">
+                    <div class="form-group">
+                        <label for="name">Your Name *</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_info">Email or Phone Number (Optional)</label>
+                        <input type="text" id="contact_info" name="contact_info" placeholder="Enter email, phone, or leave blank">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+        </section>
     </div>
-
-    <!-- UNLOCK SECTION (PC ke liye) -->
-    <div id="unlock-section" class="vault-box" style="margin-top:30px;">
-        <h3 style="color:#065f46; margin-bottom:15px;">🔓 Unlock File (Mobile → PC)</h3>
-        <p style="font-size:0.95rem; color:#475569; margin-bottom:15px;">
-            Mobile se copy kiya hua <b>Vault Link</b> yahan paste karo + PIN daalo
-        </p>
-
-        <div class="form-group">
-            <label for="paste-vault-link">Paste Vault Link *</label>
-            <input type="text" id="paste-vault-link" placeholder="https://hoodarurkiaala.is-a.dev/#vault=...">
+    <footer>
+        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
+        <div class="visitor-badge">
+            👁️ Total Visitors: <span id="visitor-count">Loading...</span>
         </div>
-        <div class="form-group">
-            <label for="unlock-pin">Enter Secret PIN *</label>
-            <input type="text" id="unlock-pin" placeholder="Enter the same PIN">
-        </div>
-        <button type="button" class="btn" onclick="startUnlockFromLink()">Unlock & Download</button>
-        <div id="unlock-status" class="status-msg"></div>
-    </div>
-</section>
+    </footer>
+    <script>
+        // 1. Safe GitHub Links Setup
+        var ghBase = "https://github" + ".com/HoodaRurkiAala";
+        document.getElementById("gh-btn").href = ghBase;
+        document.getElementById("proj2-link").href = ghBase;
+        document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
+
+        // 2. Safe FormSubmit Action URL Setup
+        var f1 = "https://formsubmit";
+        var f2 = ".co/hoodarurkiaala";
+        var f3 = "@gmail.com";
+        document.getElementById("myForm").action = f1 + f2 + f3;
+
+        // 3. Safe Live Visitor Counter Setup
+        var c1 = "https://api.counterapi";
+        var c2 = ".dev/v1/hoodarurkiaala-is-a-dev";
+        var c3 = "/visits/up";
+        fetch(c1 + c2 + c3)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && data.count) {
+                    document.getElementById('visitor-count').innerText = data.count;
+                }
+            })
+            .catch(function() {
+                var localCount = localStorage.getItem('hooda_visits') || 1;
+                localCount = parseInt(localCount) + 1;
+                localStorage.setItem('hooda_visits', localCount);
+                document.getElementById('visitor-count').innerText = localCount;
+            });
+    </script>
+</body>
+</html>
