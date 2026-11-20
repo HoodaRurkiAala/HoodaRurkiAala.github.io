@@ -117,3 +117,5 @@ function startUnlock() {
         status.innerText = "❌ Incorrect PIN!";
     }
 }
+<script src="https://cloudinary.com" type="text/javascript"></script>
+<script src="app.js"></script>
