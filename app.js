@@ -97,7 +97,7 @@ function startUpload() {
 
     var file = fileInput.files.item(0);
     btn.disabled = true;
-    btn.innerText = "Uploadng...";
+    btn.innerText = "Uploading...";
     status.style.color = "#047857";
     status.innerText = "⏳ Connecting to Cloudinary...";
 
