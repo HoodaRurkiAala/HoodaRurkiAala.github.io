@@ -26,26 +26,47 @@ function xorText(str, pin) {
     return out;
 }
 
-// ====================== SHOW QR ======================
-function showQR(fileUrl, fileName, resType, pin, status, btn) {
+// ====================== SHOW RESULT (QR + Link) ======================
+function showResult(fileUrl, fileName, resType, pin, status, btn) {
     var info = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
     var locked = btoa(encodeURIComponent(xorText(info, pin)));
     var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
-    var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(finalLink);
 
+    // QR Code
+    var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=" + encodeURIComponent(finalLink);
     document.getElementById("qr-image").src = qrUrl;
     document.getElementById("download-qr-btn").href = qrUrl;
+
+    // Show Vault Link
+    document.getElementById("vault-link-text").value = finalLink;
+
+    // Show result box
     document.getElementById("qr-output").style.display = "block";
+
     btn.disabled = false;
     btn.innerText = "Upload & Generate Secure QR";
     status.style.color = "#059669";
-    status.innerText = "✅ Done! Scan the QR code below.";
+    status.innerText = "✅ Done! QR aur Vault Link ready hai.";
+}
+
+// ====================== COPY VAULT LINK ======================
+function copyVaultLink() {
+    var linkInput = document.getElementById("vault-link-text");
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(linkInput.value).then(function() {
+        var btn = document.getElementById("copy-link-btn");
+        btn.innerText = "Copied!";
+        setTimeout(function() {
+            btn.innerText = "Copy Vault Link";
+        }, 2000);
+    });
 }
 
 // ====================== BACKUP UPLOAD (Catbox) ======================
 function tryCatbox(file, pin, status, btn, cloudErr) {
     status.style.color = "#b45309";
-    status.innerText = "⚠️ Cloudinary issue (" + cloudErr + "). Trying Backup Server...";
+    status.innerText = "⚠️ Cloudinary issue (" + cloudErr + "). Trying Backup...";
 
     var formData = new FormData();
     formData.append("reqtype", "fileupload");
@@ -58,12 +79,12 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
     xhr.onload = function() {
         var resText = (xhr.responseText || "").trim();
         if (xhr.status === 200 && resText.indexOf("https://") === 0) {
-            showQR(resText, file.name, "raw", pin, status, btn);
+            showResult(resText, file.name, "raw", pin, status, btn);
         } else {
             btn.disabled = false;
             btn.innerText = "Upload & Generate Secure QR";
             status.style.color = "#dc2626";
-            status.innerText = "❌ Both failed! Cloudinary: [" + cloudErr + "] | Backup: [" + xhr.status + "]";
+            status.innerText = "❌ Upload failed. Try again.";
         }
     };
 
@@ -71,13 +92,13 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
         btn.disabled = false;
         btn.innerText = "Upload & Generate Secure QR";
         status.style.color = "#dc2626";
-        status.innerText = "❌ Network/CORS Blocked!";
+        status.innerText = "❌ Network Error";
     };
 
     xhr.send(formData);
 }
 
-// ====================== MAIN UPLOAD FUNCTION ======================
+// ====================== MAIN UPLOAD ======================
 function startUpload() {
     var fileInput = document.getElementById("file-input");
     var pin = document.getElementById("secret-pin").value.trim();
@@ -99,17 +120,12 @@ function startUpload() {
     btn.disabled = true;
     btn.innerText = "Uploading...";
     status.style.color = "#047857";
-    status.innerText = "⏳ Connecting to Cloudinary...";
+    status.innerText = "⏳ Uploading...";
 
-    // Detect resource type
     var resourceType = "raw";
-    if (file.type.indexOf("image/") === 0) {
-        resourceType = "image";
-    } else if (file.type.indexOf("video/") === 0 || file.type.indexOf("audio/") === 0) {
-        resourceType = "video";
-    }
+    if (file.type.indexOf("image/") === 0) resourceType = "image";
+    else if (file.type.indexOf("video/") === 0 || file.type.indexOf("audio/") === 0) resourceType = "video";
 
-    // Correct Cloudinary endpoint
     var url = "https://api.cloudinary.com/v1_1/ztpyye46/" + resourceType + "/upload";
     var formData = new FormData();
     formData.append("file", file);
@@ -126,21 +142,16 @@ function startUpload() {
         }
     };
 
-    xhr.ontimeout = function() {
-        tryCatbox(file, pin, status, btn, "Timeout");
-    };
-
-    xhr.onerror = function() {
-        tryCatbox(file, pin, status, btn, "Network Error");
-    };
+    xhr.ontimeout = function() { tryCatbox(file, pin, status, btn, "Timeout"); };
+    xhr.onerror = function() { tryCatbox(file, pin, status, btn, "Network Error"); };
 
     xhr.onload = function() {
         try {
             var data = JSON.parse(xhr.responseText);
             if (xhr.status === 200 && data.secure_url) {
-                showQR(data.secure_url, file.name, resourceType, pin, status, btn);
+                showResult(data.secure_url, file.name, resourceType, pin, status, btn);
             } else {
-                var msg = (data && data.error && data.error.message) ? data.error.message : ("HTTP " + xhr.status);
+                var msg = (data && data.error && data.error.message) ? data.error.message : "Error";
                 tryCatbox(file, pin, status, btn, msg);
             }
         } catch (err) {
@@ -151,34 +162,44 @@ function startUpload() {
     xhr.send(formData);
 }
 
-// ====================== UNLOCK SECTION ======================
-if (window.location.hash && window.location.hash.indexOf("#vault=") === 0) {
-    var unlockSection = document.getElementById("unlock-section");
-    if (unlockSection) {
-        unlockSection.style.display = "block";
-        unlockSection.scrollIntoView({ behavior: "smooth" });
-    }
-}
-
-function startUnlock() {
+// ====================== UNLOCK FROM PASTED LINK ======================
+function startUnlockFromLink() {
+    var vaultLink = document.getElementById("paste-vault-link").value.trim();
     var pin = document.getElementById("unlock-pin").value.trim();
     var status = document.getElementById("unlock-status");
+
+    if (!vaultLink) {
+        status.style.color = "#dc2626";
+        status.innerText = "❌ Please paste the Vault Link!";
+        return;
+    }
     if (!pin) {
         status.style.color = "#dc2626";
         status.innerText = "❌ Please enter Secret PIN!";
         return;
     }
+
     try {
-        var hashPart = window.location.hash.replace("#vault=", "");
+        // Extract #vault= part
+        var hashPart = "";
+        if (vaultLink.indexOf("#vault=") !== -1) {
+            hashPart = vaultLink.split("#vault=")[1];
+        } else {
+            hashPart = vaultLink; // in case user pasted only the code
+        }
+
         var decoded = xorText(decodeURIComponent(atob(hashPart)), pin);
         var fileData = JSON.parse(decoded);
+
         if (fileData && fileData.u && fileData.u.indexOf("http") === 0) {
             status.style.color = "#059669";
             status.innerText = "✅ PIN Verified! Downloading...";
+
             var origUrl = fileData.u;
             if (fileData.t !== "raw" && origUrl.indexOf("cloudinary.com") !== -1) {
                 origUrl = fileData.u.split("/upload/").join("/upload/fl_attachment/");
             }
+
             var a = document.createElement("a");
             a.href = origUrl;
             a.download = fileData.n || "hooda-file";
@@ -190,6 +211,14 @@ function startUnlock() {
         }
     } catch (e) {
         status.style.color = "#dc2626";
-        status.innerText = "❌ Incorrect PIN!";
+        status.innerText = "❌ Incorrect PIN or invalid link!";
     }
+}
+
+// ====================== AUTO UNLOCK IF OPENED VIA QR ======================
+if (window.location.hash && window.location.hash.indexOf("#vault=") === 0) {
+    // Auto fill the paste box
+    document.getElementById("paste-vault-link").value = window.location.href;
+    document.getElementById("unlock-section").style.display = "block";
+    document.getElementById("unlock-section").scrollIntoView({ behavior: "smooth" });
 }
