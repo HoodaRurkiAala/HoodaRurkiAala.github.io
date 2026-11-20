@@ -42,7 +42,7 @@
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
         .status-msg { margin-top: 14px; font-weight: 600; font-size: 0.98rem; }
         .qr-result { margin-top: 20px; text-align: center; background: #ffffff; padding: 22px; border-radius: 10px; border: 1px solid #a7f3d0; }
-        .secret-key-display { font-size: 2rem; font-weight: 800; letter-spacing: 6px; color: #065f46; background: #ecfdf5; border: 2px dashed #059669; padding: 12px 24px; border-radius: 8px; display: inline-block; margin: 10px 0 16px; user-select: all; }
+        .secret-key-big { font-size: 2.4rem; font-weight: 800; letter-spacing: 8px; color: #065f46; background: #ecfdf5; border: 2px dashed #059669; border-radius: 10px; padding: 12px 10px 12px 18px; margin: 10px 0 14px; user-select: all; }
         .skills-grid { display: flex; flex-wrap: wrap; gap: 12px; }
         .skill-tag { background-color: #ecfdf5; border: 1px solid #6ee7b7; padding: 8px 18px; border-radius: 20px; font-size: 0.95rem; color: #065f46; font-weight: 600; }
         .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
@@ -68,30 +68,33 @@
 
         <!-- ==================== SECURE FILE LOCKER ==================== -->
         <section id="vault">
-            <h2>🔐 Secure File-to-QR & Key Locker</h2>
-            
+            <h2>🔐 Secure File-to-QR Locker</h2>
+
             <div class="vault-box">
                 <div class="form-group">
                     <label for="file-input">1. Select Any File (Image, Video, Audio, PDF) *</label>
                     <input type="file" id="file-input">
                 </div>
                 <div class="form-group">
-                    <label for="secret-pin">2. Create a Custom Secret Key (Ya khali chhodein auto-key ke liye)</label>
-                    <input type="text" id="secret-pin" placeholder="Example: HOODA12 ya 4589" maxlength="15">
+                    <label for="secret-pin">2. Create a Secret PIN *</label>
+                    <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA" maxlength="20">
                 </div>
-                <button type="button" class="btn" id="upload-btn" onclick="startUpload()">Upload & Generate Key + QR</button>
+                <button type="button" class="btn" id="upload-btn" onclick="startUpload()">Upload & Generate Secure QR</button>
                 <div id="upload-status" class="status-msg"></div>
 
-                <!-- RESULT BOX -->
+                <!-- RESULT BOX : QR + Secret Key (Vault Link ki jagah) -->
                 <div id="qr-output" class="qr-result" style="display:none;">
-                    <h3 style="color:#065f46; margin-bottom:10px;">✅ File Ready! Scan QR ya Secret Key use karein:</h3>
-                    
-                    <p style="font-weight:600; color:#047857; margin-top:8px;">PC par kholne ke liye Secret Key:</p>
-                    <div id="generated-key-box" class="secret-key-display">------</div>
-                    <br>
+                    <h3 style="color:#065f46; margin-bottom:12px;">✅ Your Secure File is Ready!</h3>
 
-                    <img id="qr-image" src="" alt="Secure QR Code" style="max-width:240px; border-radius:8px; margin-bottom:15px;">
-                    
+                    <img id="qr-image" src="" alt="Secure QR Code" style="max-width:280px; border-radius:8px; margin-bottom:15px;">
+
+                    <p style="margin:10px 0 6px; font-weight:700; color:#065f46;">🔑 Secret Key (dusre device par type karo):</p>
+                    <div id="secret-key-text" class="secret-key-big">------</div>
+                    <p style="font-size:0.85rem; color:#475569; margin-bottom:12px;">
+                        PC → Mobile = QR Scan karo &nbsp;|&nbsp; Mobile → PC = Ye 6-letter Key + PIN type karo.<br>
+                        Lambi link bhejne ki zaroorat nahi!
+                    </p>
+
                     <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
                         <button type="button" class="btn" id="copy-key-btn" onclick="copySecretKey()" style="padding:8px 16px; font-size:0.9rem;">Copy Secret Key</button>
                         <a id="download-qr-btn" href="#" download="Hooda-Secure-QR.png" class="btn" style="padding:8px 16px; font-size:0.9rem;">Download QR</a>
@@ -99,18 +102,24 @@
                 </div>
             </div>
 
-            <!-- UNLOCK SECTION -->
+            <!-- UNLOCK SECTION : Secret Key se -->
             <div id="unlock-section" class="vault-box">
-                <h3 style="color:#065f46; margin-bottom:12px;">🔓 Unlock File (Mobile → PC)</h3>
+                <h3 style="color:#065f46; margin-bottom:12px;">🔓 Unlock File (Secret Key se)</h3>
                 <p style="font-size:0.95rem; color:#475569; margin-bottom:16px;">
-                    Mobile par bani <b>Secret Key</b> yahan daalein aur file seedha download karein:
+                    Dusre device par dikha <b>6-letter Secret Key</b> yahan likho + wahi PIN daalo.<br>
+                    (Purana Vault Link bhi yahin chal jayega — backup ke liye)
                 </p>
 
                 <div class="form-group">
-                    <label for="unlock-key">Enter Secret Key *</label>
-                    <input type="text" id="unlock-key" placeholder="Example: HOODA12 ya 4589" style="text-transform: uppercase; font-weight: bold; letter-spacing: 2px;">
+                    <label for="paste-vault-link">Secret Key *</label>
+                    <input type="text" id="paste-vault-link" placeholder="Example: K7X2P9" maxlength="500"
+                           style="text-transform:uppercase; font-weight:700; letter-spacing:3px;" autocomplete="off">
                 </div>
-                <button type="button" class="btn" id="unlock-btn" onclick="startUnlockFromKey()">Unlock & Download</button>
+                <div class="form-group">
+                    <label for="unlock-pin">Enter Secret PIN *</label>
+                    <input type="text" id="unlock-pin" placeholder="Same PIN jo upload time pe dala tha">
+                </div>
+                <button type="button" class="btn" onclick="startUnlock()">Unlock & Download</button>
                 <div id="unlock-status" class="status-msg"></div>
             </div>
         </section>
@@ -151,3 +160,38 @@
             </div>
         </section>
 
+        <!-- ==================== CONTACT ==================== -->
+        <section id="contact">
+            <h2>Contact Me</h2>
+            <div class="contact-form">
+                <form id="myForm" method="POST">
+                    <input type="hidden" name="_subject" value="New Message from Hooda Rurki Aala Website!">
+                    <input type="hidden" name="_captcha" value="false">
+                    <div class="form-group">
+                        <label for="name">Your Name *</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_info">Email or Phone Number (Optional)</label>
+                        <input type="text" id="contact_info" name="contact_info" placeholder="Enter email, phone, or leave blank">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Contact: hoodarurkiaala@gmail.com | Built by Hooda Rurki Aala</p>
+        <div class="visitor-badge">
+            👁️ Total Visitors: <span id="visitor-count">Loading...</span>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+<script>window.__CF$cv$params={r:'a5d74fbaeb79a5d3',t:'MTc5NTE3NjIwNg==',u:'01a1f8d713d7771cb2e5bb8b9e26cb90',ut:'C49wMKCazL9r4gMf2hxigNrwP7aacBYzcKFT.TYx8dQ-1795176207-1.2.1.1-pkiA65YiTbwDsX2d9naKRjRWwvOATcHeprDiBNIASfTSLZH5fEnph0ypB0JQMqEDqZ6ufxknIYmHQePE7g6lHoqPO2VieXFbcdUsjs1zUZM',i:60};(function(){if(!document.body)return;var l=window.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/precursor/main.js?ray=a5d74fbaeb79a5d3',s=document.createElement('script');s.src=o?new URL(u,o).href:u;document.head.appendChild(s);})();</script></body>
+</html>
