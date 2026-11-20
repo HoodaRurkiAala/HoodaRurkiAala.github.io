@@ -1,3 +1,10 @@
+
+---
+
+### 2. Updated `app.js`
+Isme aap jo bhi **Secret Key** chunte hain (ya agar box khali chhodte hain to yeh khud 6-digit code bana dega), uske naam se file ka link cloud par store ho jayega [0.1.1]. PC par wahi key daalte hi file turant download ho jayegi. Saath hi QR code bhi kaam karta rahega.
+
+```javascript
 // ====================== SAFE LINKS ======================
 var ghBase = "https://github.com/HoodaRurkiAala";
 document.getElementById("gh-btn").href = ghBase;
@@ -17,54 +24,67 @@ fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
         document.getElementById("visitor-count").innerText = c;
     });
 
-// ====================== XOR ENCRYPTION ======================
-function xorText(str, pin) {
-    var out = "";
-    for (var i = 0; i < str.length; i++) {
-        out += String.fromCharCode(str.charCodeAt(i) ^ pin.charCodeAt(i % pin.length));
+// ====================== KEY-VALUE CLOUD STORAGE (For Short Secret Key) ======================
+// Note: Uses free npoint / kvdb style public bucket via jsonstorage or kvdb
+var KV_BUCKET = "https://kvdb.io/Drx8P2mN9vL4qW7zR5tY1k/"; // Dedicated free key-value store
+
+function generateRandomKey() {
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    var key = "";
+    for (var i = 0; i < 6; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return out;
+    return key;
 }
 
-// ====================== SHOW RESULT (QR + Link) ======================
-function showResult(fileUrl, fileName, resType, pin, status, btn) {
-    var info = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
-    var locked = btoa(encodeURIComponent(xorText(info, pin)));
-    var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
+// ====================== SHOW RESULT (QR + Secret Key) ======================
+function showResult(fileUrl, fileName, resType, secretKey, status, btn) {
+    var payload = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
 
-    // QR Code
-    var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=" + encodeURIComponent(finalLink);
-    document.getElementById("qr-image").src = qrUrl;
-    document.getElementById("download-qr-btn").href = qrUrl;
+    // Save payload under the chosen Secret Key
+    fetch(KV_BUCKET + encodeURIComponent(secretKey), {
+        method: "POST",
+        body: payload
+    })
+    .then(function(res) {
+        if (!res.ok) throw new Error("Storage Error");
 
-    // Show Vault Link
-    document.getElementById("vault-link-text").value = finalLink;
+        // QR Link with auto-key parameter
+        var qrDirectLink = window.location.origin + window.location.pathname + "?key=" + encodeURIComponent(secretKey);
+        var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" + encodeURIComponent(qrDirectLink);
 
-    // Show result box
-    document.getElementById("qr-output").style.display = "block";
+        document.getElementById("generated-key-box").innerText = secretKey;
+        document.getElementById("qr-image").src = qrUrl;
+        document.getElementById("download-qr-btn").href = qrUrl;
+        document.getElementById("qr-output").style.display = "block";
 
-    btn.disabled = false;
-    btn.innerText = "Upload & Generate Secure QR";
-    status.style.color = "#059669";
-    status.innerText = "✅ Done! QR aur Vault Link ready hai.";
+        btn.disabled = false;
+        btn.innerText = "Upload & Generate Key + QR";
+        status.style.color = "#059669";
+        status.innerText = "✅ Done! Secret Key aur QR ready hai.";
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerText = "Upload & Generate Key + QR";
+        status.style.color = "#dc2626";
+        status.innerText = "❌ Key save karne me error aaya. Dubara try karein.";
+    });
 }
 
-// ====================== COPY VAULT LINK ======================
-function copyVaultLink() {
-    var linkInput = document.getElementById("vault-link-text");
-    linkInput.select();
-    linkInput.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(linkInput.value).then(function() {
-        var btn = document.getElementById("copy-link-btn");
+// ====================== COPY SECRET KEY ======================
+function copySecretKey() {
+    var keyText = document.getElementById("generated-key-box").innerText;
+    navigator.clipboard.writeText(keyText).then(function() {
+        var btn = document.getElementById("copy-key-btn");
         btn.innerText = "Copied!";
         setTimeout(function() {
-            btn.innerText = "Copy Vault Link";
+            btn.innerText = "Copy Secret Key";
         }, 2000);
     });
 }
 
 // ====================== BACKUP UPLOAD (Catbox) ======================
-function tryCatbox(file, pin, status, btn, cloudErr) {
+function tryCatbox(file, secretKey, status, btn, cloudErr) {
     status.style.color = "#b45309";
     status.innerText = "⚠️ Cloudinary issue (" + cloudErr + "). Trying Backup...";
 
@@ -79,10 +99,10 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
     xhr.onload = function() {
         var resText = (xhr.responseText || "").trim();
         if (xhr.status === 200 && resText.indexOf("https://") === 0) {
-            showResult(resText, file.name, "raw", pin, status, btn);
+            showResult(resText, file.name, "raw", secretKey, status, btn);
         } else {
             btn.disabled = false;
-            btn.innerText = "Upload & Generate Secure QR";
+            btn.innerText = "Upload & Generate Key + QR";
             status.style.color = "#dc2626";
             status.innerText = "❌ Upload failed. Try again.";
         }
@@ -90,7 +110,7 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
 
     xhr.onerror = function() {
         btn.disabled = false;
-        btn.innerText = "Upload & Generate Secure QR";
+        btn.innerText = "Upload & Generate Key + QR";
         status.style.color = "#dc2626";
         status.innerText = "❌ Network Error";
     };
@@ -101,7 +121,7 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
 // ====================== MAIN UPLOAD ======================
 function startUpload() {
     var fileInput = document.getElementById("file-input");
-    var pin = document.getElementById("secret-pin").value.trim();
+    var customKey = document.getElementById("secret-pin").value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
     var status = document.getElementById("upload-status");
     var btn = document.getElementById("upload-btn");
 
@@ -110,11 +130,9 @@ function startUpload() {
         status.innerText = "❌ Please select a file first!";
         return;
     }
-    if (!pin) {
-        status.style.color = "#dc2626";
-        status.innerText = "❌ Please enter a Secret PIN!";
-        return;
-    }
+
+    // Agar user ne key nahi daali to auto 6-digit key bana do
+    var secretKey = customKey ? customKey : generateRandomKey();
 
     var file = fileInput.files.item(0);
     btn.disabled = true;
@@ -142,83 +160,83 @@ function startUpload() {
         }
     };
 
-    xhr.ontimeout = function() { tryCatbox(file, pin, status, btn, "Timeout"); };
-    xhr.onerror = function() { tryCatbox(file, pin, status, btn, "Network Error"); };
+    xhr.ontimeout = function() { tryCatbox(file, secretKey, status, btn, "Timeout"); };
+    xhr.onerror = function() { tryCatbox(file, secretKey, status, btn, "Network Error"); };
 
     xhr.onload = function() {
         try {
             var data = JSON.parse(xhr.responseText);
             if (xhr.status === 200 && data.secure_url) {
-                showResult(data.secure_url, file.name, resourceType, pin, status, btn);
+                showResult(data.secure_url, file.name, resourceType, secretKey, status, btn);
             } else {
                 var msg = (data && data.error && data.error.message) ? data.error.message : "Error";
-                tryCatbox(file, pin, status, btn, msg);
+                tryCatbox(file, secretKey, status, btn, msg);
             }
         } catch (err) {
-            tryCatbox(file, pin, status, btn, "Invalid Response");
+            tryCatbox(file, secretKey, status, btn, "Invalid Response");
         }
     };
 
     xhr.send(formData);
 }
 
-// ====================== UNLOCK FROM PASTED LINK ======================
-function startUnlockFromLink() {
-    var vaultLink = document.getElementById("paste-vault-link").value.trim();
-    var pin = document.getElementById("unlock-pin").value.trim();
+// ====================== UNLOCK FROM SECRET KEY ======================
+function startUnlockFromKey() {
+    var keyInput = document.getElementById("unlock-key").value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
     var status = document.getElementById("unlock-status");
+    var btn = document.getElementById("unlock-btn");
 
-    if (!vaultLink) {
+    if (!keyInput) {
         status.style.color = "#dc2626";
-        status.innerText = "❌ Please paste the Vault Link!";
-        return;
-    }
-    if (!pin) {
-        status.style.color = "#dc2626";
-        status.innerText = "❌ Please enter Secret PIN!";
+        status.innerText = "❌ Please enter Secret Key!";
         return;
     }
 
-    try {
-        // Extract #vault= part
-        var hashPart = "";
-        if (vaultLink.indexOf("#vault=") !== -1) {
-            hashPart = vaultLink.split("#vault=")[1];
-        } else {
-            hashPart = vaultLink; // in case user pasted only the code
-        }
+    btn.disabled = true;
+    btn.innerText = "Checking Key...";
+    status.style.color = "#047857";
+    status.innerText = "⏳ File dhundhi ja rahi hai...";
 
-        var decoded = xorText(decodeURIComponent(atob(hashPart)), pin);
-        var fileData = JSON.parse(decoded);
+    fetch(KV_BUCKET + encodeURIComponent(keyInput))
+        .then(function(res) {
+            if (!res.ok) throw new Error("Not found");
+            return res.json();
+        })
+        .then(function(fileData) {
+            if (fileData && fileData.u && fileData.u.indexOf("http") === 0) {
+                status.style.color = "#059669";
+                status.innerText = "✅ Key Verified! Downloading: " + fileData.n;
 
-        if (fileData && fileData.u && fileData.u.indexOf("http") === 0) {
-            status.style.color = "#059669";
-            status.innerText = "✅ PIN Verified! Downloading...";
+                var origUrl = fileData.u;
+                if (fileData.t !== "raw" && origUrl.indexOf("cloudinary.com") !== -1) {
+                    origUrl = fileData.u.split("/upload/").join("/upload/fl_attachment/");
+                }
 
-            var origUrl = fileData.u;
-            if (fileData.t !== "raw" && origUrl.indexOf("cloudinary.com") !== -1) {
-                origUrl = fileData.u.split("/upload/").join("/upload/fl_attachment/");
+                var a = document.createElement("a");
+                a.href = origUrl;
+                a.download = fileData.n || "hooda-file";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                throw new Error("Invalid Data");
             }
-
-            var a = document.createElement("a");
-            a.href = origUrl;
-            a.download = fileData.n || "hooda-file";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        } else {
-            throw new Error("Wrong PIN");
-        }
-    } catch (e) {
-        status.style.color = "#dc2626";
-        status.innerText = "❌ Incorrect PIN or invalid link!";
-    }
+        })
+        .catch(function() {
+            status.style.color = "#dc2626";
+            status.innerText = "❌ Galat Secret Key ya file expire ho gayi hai!";
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerText = "Unlock & Download";
+        });
 }
 
 // ====================== AUTO UNLOCK IF OPENED VIA QR ======================
-if (window.location.hash && window.location.hash.indexOf("#vault=") === 0) {
-    // Auto fill the paste box
-    document.getElementById("paste-vault-link").value = window.location.href;
-    document.getElementById("unlock-section").style.display = "block";
+var urlParams = new URLSearchParams(window.location.search);
+var qrKey = urlParams.get("key");
+if (qrKey) {
+    document.getElementById("unlock-key").value = qrKey;
     document.getElementById("unlock-section").scrollIntoView({ behavior: "smooth" });
+    startUnlockFromKey();
 }
