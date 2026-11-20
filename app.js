@@ -71,7 +71,7 @@ function tryCatbox(file, pin, status, btn, cloudErr) {
         btn.disabled = false;
         btn.innerText = "Upload & Generate Secure QR";
         status.style.color = "#dc2626";
-        status.innerText = "❌ Network/CORS Blocked!";
+        status.innerText = "❌ Network/CORS Blockd!";
     };
 
     xhr.send(formData);
