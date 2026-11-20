@@ -66,58 +66,58 @@
     <div class="container">
 
         <!-- ==================== SECURE FILE LOCKER ==================== -->
-        <section id="vault">
-            <h2>🔐 Secure File-to-QR Locker</h2>
+      <section id="vault">
+    <h2>🔐 Secure File-to-QR Locker</h2>
+    <div class="vault-box">
+
+        <!-- UPLOAD PART -->
+        <div class="form-group">
+            <label for="file-input">1. Select Any File (Image, Video, Audio, PDF) *</label>
+            <input type="file" id="file-input">
+        </div>
+        <div class="form-group">
+            <label for="secret-pin">2. Create a Secret PIN *</label>
+            <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA" maxlength="20">
+        </div>
+        <button type="button" class="btn" id="upload-btn" onclick="startUpload()">Upload & Generate Secure QR</button>
+        <div id="upload-status" class="status-msg"></div>
+
+        <!-- RESULT (QR + LINK) -->
+        <div id="qr-output" class="qr-result" style="display:none; margin-top:25px;">
+            <h3 style="color:#065f46; margin-bottom:12px;">✅ Your Secure File is Ready!</h3>
             
-            <div class="vault-box">
-                <div class="form-group">
-                    <label for="file-input">1. Select Any File (Image, Video, Audio, PDF) *</label>
-                    <input type="file" id="file-input">
-                </div>
-                <div class="form-group">
-                    <label for="secret-pin">2. Create a Secret PIN *</label>
-                    <input type="text" id="secret-pin" placeholder="Example: 1234 or HOODA" maxlength="20">
-                </div>
-                <button type="button" class="btn" id="upload-btn" onclick="startUpload()">Upload & Generate Secure QR</button>
-                <div id="upload-status" class="status-msg"></div>
-
-                <!-- RESULT BOX -->
-                <div id="qr-output" class="qr-result" style="display:none;">
-                    <h3 style="color:#065f46; margin-bottom:12px;">✅ Your Secure File is Ready!</h3>
-                    
-                    <img id="qr-image" src="" alt="Secure QR Code" style="max-width:280px; border-radius:8px; margin-bottom:15px;">
-                    
-                    <p style="margin:10px 0 6px; font-weight:600; color:#065f46;">Vault Link (PC ke liye copy karo):</p>
-                    <input type="text" id="vault-link-text" readonly 
-                           style="width:100%; padding:10px; font-size:0.85rem; border:1px solid #a7f3d0; border-radius:6px; background:#f0fdf4; margin-bottom:12px;">
-                    
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-                        <button type="button" class="btn" id="copy-link-btn" onclick="copyVaultLink()" style="padding:8px 16px; font-size:0.9rem;">Copy Vault Link</button>
-                        <a id="download-qr-btn" href="#" download="Hooda-Secure-QR.png" class="btn" style="padding:8px 16px; font-size:0.9rem;">Download QR</a>
-                    </div>
-                </div>
+            <img id="qr-image" src="" alt="Secure QR Code" style="max-width:280px; border-radius:8px;">
+            
+            <p style="margin:15px 0 8px; font-weight:600; color:#065f46;">Vault Link (Copy this for PC):</p>
+            <input type="text" id="vault-link-text" readonly 
+                   style="width:100%; padding:10px; font-size:0.85rem; border:1px solid #a7f3d0; border-radius:6px; background:#f0fdf4;">
+            
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" class="btn" id="copy-link-btn" onclick="copyVaultLink()" style="padding:8px 16px; font-size:0.9rem;">Copy Vault Link</button>
+                <a id="download-qr-btn" href="#" download="Hooda-Secure-QR.png" class="btn" style="padding:8px 16px; font-size:0.9rem;">Download QR</a>
             </div>
+        </div>
+    </div>
 
-            <!-- UNLOCK SECTION -->
-            <div id="unlock-section" class="vault-box">
-                <h3 style="color:#065f46; margin-bottom:12px;">🔓 Unlock File (Mobile → PC)</h3>
-                <p style="font-size:0.95rem; color:#475569; margin-bottom:16px;">
-                    Mobile se <b>Copy Vault Link</b> karke yahan paste karo + PIN daalo
-                </p>
+    <!-- UNLOCK SECTION (PC ke liye) -->
+    <div id="unlock-section" class="vault-box" style="margin-top:30px;">
+        <h3 style="color:#065f46; margin-bottom:15px;">🔓 Unlock File (Mobile → PC)</h3>
+        <p style="font-size:0.95rem; color:#475569; margin-bottom:15px;">
+            Mobile se copy kiya hua <b>Vault Link</b> yahan paste karo + PIN daalo
+        </p>
 
-                <div class="form-group">
-                    <label for="paste-vault-link">Paste Vault Link *</label>
-                    <input type="text" id="paste-vault-link" placeholder="https://hoodarurkiaala.is-a.dev/#vault=...">
-                </div>
-                <div class="form-group">
-                    <label for="unlock-pin">Enter Secret PIN *</label>
-                    <input type="text" id="unlock-pin" placeholder="Same PIN jo upload time pe dala tha">
-                </div>
-                <button type="button" class="btn" onclick="startUnlockFromLink()">Unlock & Download</button>
-                <div id="unlock-status" class="status-msg"></div>
-            </div>
-        </section>
-
+        <div class="form-group">
+            <label for="paste-vault-link">Paste Vault Link *</label>
+            <input type="text" id="paste-vault-link" placeholder="https://hoodarurkiaala.is-a.dev/#vault=...">
+        </div>
+        <div class="form-group">
+            <label for="unlock-pin">Enter Secret PIN *</label>
+            <input type="text" id="unlock-pin" placeholder="Enter the same PIN">
+        </div>
+        <button type="button" class="btn" onclick="startUnlockFromLink()">Unlock & Download</button>
+        <div id="unlock-status" class="status-msg"></div>
+    </div>
+</section>
         <!-- ==================== ABOUT ==================== -->
         <section id="about">
             <h2>About Me</h2>
