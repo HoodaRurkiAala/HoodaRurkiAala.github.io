@@ -1,12 +1,10 @@
-// ====================== SAFE LINKS ======================
-var ghBase = "https://github.com/HoodaRurkiAala";
+var ghBase = "https://github.com";
 document.getElementById("gh-btn").href = ghBase;
 document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
-document.getElementById("myForm").action = "https://formsubmit.co/hoodarurkiaala@gmail.com";
+document.getElementById("myForm").action = "https://formsubmit.co";
 
-// ====================== VISITOR COUNTER ======================
-fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
+fetch("https://counterapi.dev")
     .then(function(r) { return r.json(); })
     .then(function(d) {
         if (d && d.count) document.getElementById("visitor-count").innerText = d.count;
@@ -17,7 +15,6 @@ fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
         document.getElementById("visitor-count").innerText = c;
     });
 
-// ====================== XOR ENCRYPTION ======================
 function xorText(str, pin) {
     var out = "";
     for (var i = 0; i < str.length; i++) {
@@ -26,137 +23,64 @@ function xorText(str, pin) {
     return out;
 }
 
-// ====================== SHOW QR ======================
-function showQR(fileUrl, fileName, resType, pin, status, btn) {
-    var info = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
-    var locked = btoa(encodeURIComponent(xorText(info, pin)));
-    var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
-    var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(finalLink);
-
-    document.getElementById("qr-image").src = qrUrl;
-    document.getElementById("download-qr-btn").href = qrUrl;
-    document.getElementById("qr-output").style.display = "block";
-    btn.disabled = false;
-    btn.innerText = "Upload & Generate Secure QR";
-    status.style.color = "#059669";
-    status.innerText = "✅ Done! Scan the QR code below.";
-}
-
-// ====================== BACKUP UPLOAD (Catbox) ======================
-function tryCatbox(file, pin, status, btn, cloudErr) {
-    status.style.color = "#b45309";
-    status.innerText = "⚠️ Cloudinary issue (" + cloudErr + "). Trying Backup Server...";
-
-    var formData = new FormData();
-    formData.append("reqtype", "fileupload");
-    formData.append("time", "72h");
-    formData.append("fileToUpload", file);
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://litterbox.catbox.moe/resources/internals/api.php", true);
-
-    xhr.onload = function() {
-        var resText = (xhr.responseText || "").trim();
-        if (xhr.status === 200 && resText.indexOf("https://") === 0) {
-            showQR(resText, file.name, "raw", pin, status, btn);
-        } else {
-            btn.disabled = false;
-            btn.innerText = "Upload & Generate Secure QR";
-            status.style.color = "#dc2626";
-            status.innerText = "❌ Both failed! Cloudinary: [" + cloudErr + "] | Backup: [" + xhr.status + "]";
-        }
-    };
-
-    xhr.onerror = function() {
-        btn.disabled = false;
-        btn.innerText = "Upload & Generate Secure QR";
-        status.style.color = "#dc2626";
-        status.innerText = "❌ Network/CORS Blocked!";
-    };
-
-    xhr.send(formData);
-}
-
-// ====================== MAIN UPLOAD FUNCTION ======================
 function startUpload() {
-    var fileInput = document.getElementById("file-input");
     var pin = document.getElementById("secret-pin").value.trim();
     var status = document.getElementById("upload-status");
-    var btn = document.getElementById("upload-btn");
 
-    if (!fileInput.files || fileInput.files.length === 0) {
-        status.style.color = "#dc2626";
-        status.innerText = "❌ Please select a file first!";
-        return;
-    }
     if (!pin) {
         status.style.color = "#dc2626";
-        status.innerText = "❌ Please enter a Secret PIN!";
+        status.innerText = "❌ Please enter a Secret PIN first!";
         return;
     }
 
-    var file = fileInput.files.item(0);
-    btn.disabled = true;
-    btn.innerText = "Uploading...";
-    status.style.color = "#047857";
-    status.innerText = "⏳ Connecting to Cloudinary...";
-
-    // Detect resource type
-    var resourceType = "raw";
-    if (file.type.indexOf("image/") === 0) {
-        resourceType = "image";
-    } else if (file.type.indexOf("video/") === 0 || file.type.indexOf("audio/") === 0) {
-        resourceType = "video";
+    if (typeof cloudinary === "undefined") {
+        status.style.color = "#dc2626";
+        status.innerText = "❌ Cloudinary script not loaded!";
+        return;
     }
 
-    // Correct Cloudinary endpoint
-    var url = "https://api.cloudinary.com/v1_1/ztpyye46/" + resourceType + "/upload";
-    var formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "HoodaRurkiAala");
+    status.style.color = "#047857";
+    status.innerText = "⏳ Opening Official Cloudinary Uploader...";
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", url, true);
-    xhr.timeout = 15000;
-
-    xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-            var percent = Math.round((e.loaded / e.total) * 100);
-            status.innerText = "⏳ Uploading: " + percent + "%";
+    var myWidget = cloudinary.createUploadWidget({
+        cloudName: "ztpyye46",
+        uploadPreset: "HoodaRurkiAala",
+        sources: ["local", "camera"],
+        multiple: false,
+        resourceType: "auto",
+        maxFileSize: 100000000
+    }, function(error, result) {
+        if (error) {
+            status.style.color = "#dc2626";
+            status.innerText = "❌ Upload Error: " + (error.statusText || error.message || "Failed");
+            return;
         }
-    };
+        if (result && result.event === "success") {
+            var fileUrl = result.info.secure_url;
+            var fileName = result.info.original_filename + (result.info.format ? "." + result.info.format : "");
+            var resType = result.info.resource_type;
 
-    xhr.ontimeout = function() {
-        tryCatbox(file, pin, status, btn, "Timeout");
-    };
+            var info = JSON.stringify({ u: fileUrl, n: fileName, t: resType });
+            var locked = btoa(encodeURIComponent(xorText(info, pin)));
+            var finalLink = window.location.origin + window.location.pathname + "#vault=" + locked;
+            var qrUrl = "https://qrserver.com" + encodeURIComponent(finalLink);
 
-    xhr.onerror = function() {
-        tryCatbox(file, pin, status, btn, "Network Error");
-    };
-
-    xhr.onload = function() {
-        try {
-            var data = JSON.parse(xhr.responseText);
-            if (xhr.status === 200 && data.secure_url) {
-                showQR(data.secure_url, file.name, resourceType, pin, status, btn);
-            } else {
-                var msg = (data && data.error && data.error.message) ? data.error.message : ("HTTP " + xhr.status);
-                tryCatbox(file, pin, status, btn, msg);
-            }
-        } catch (err) {
-            tryCatbox(file, pin, status, btn, "Invalid Response");
+            document.getElementById("qr-image").src = qrUrl;
+            document.getElementById("download-qr-btn").href = qrUrl;
+            document.getElementById("qr-output").style.display = "block";
+            status.style.color = "#059669";
+            status.innerText = "✅ Done! Scan the QR code below.";
         }
-    };
+    });
 
-    xhr.send(formData);
+    myWidget.open();
 }
 
-// ====================== UNLOCK SECTION ======================
 if (window.location.hash && window.location.hash.indexOf("#vault=") === 0) {
-    var unlockSection = document.getElementById("unlock-section");
-    if (unlockSection) {
-        unlockSection.style.display = "block";
-        unlockSection.scrollIntoView({ behavior: "smooth" });
+    var unlockBox = document.getElementById("unlock-section");
+    if (unlockBox) {
+        unlockBox.style.display = "block";
+        unlockBox.scrollIntoView({ behavior: "smooth" });
     }
 }
 
