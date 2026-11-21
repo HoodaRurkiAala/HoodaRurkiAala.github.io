@@ -1,3 +1,4 @@
+
 // ====================== FIREBASE CONFIG ======================
 const firebaseConfig = {
   apiKey: "AIzaSyCoB4-YeXJQ3P_AQS5F132yoU_55WreP3w",
@@ -12,7 +13,7 @@ const firebaseConfig = {
 
 // Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getDatabase, ref, set, get, child, push, remove, onValue } from "https://gstatic.com";/firebasejs/11.0.2/firebase-database.js";
+import { getDatabase, ref, set, get, child, push, remove, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -24,7 +25,7 @@ document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
 document.getElementById("myForm").action = "https://formsubmit.co/hoodarurkiaala@gmail.com";
 
-// ====================== VISITOR COUNTER (New Working) ======================
+// ====================== VISITOR COUNTER ======================
 fetch("https://countapi.mileshilliard.com/api/v1/hit/hoodarurkiaala-visits")
   .then(function(r) { return r.json(); })
   .then(function(d) {
@@ -37,6 +38,7 @@ fetch("https://countapi.mileshilliard.com/api/v1/hit/hoodarurkiaala-visits")
   .catch(function() {
     document.getElementById("visitor-count").innerText = "—";
   });
+
 // ====================== HELPERS ======================
 function xorText(str, pin) {
   let out = "";
@@ -77,6 +79,7 @@ async function startUpload() {
     status.innerText = "❌ File select karo!";
     return;
   }
+
   if (!pin) {
     status.style.color = "#dc2626";
     status.innerText = "❌ PIN daalo!";
@@ -102,6 +105,7 @@ async function startUpload() {
       method: "POST",
       body: formData
     });
+
     const data = await res.json();
 
     if (!data.secure_url) throw new Error(data.error?.message || "Upload failed");
@@ -113,6 +117,7 @@ async function startUpload() {
     // Unique Short Code
     let shortCode = generateShortCode();
     let exists = true;
+
     while (exists) {
       const snapshot = await get(child(ref(db), "files/" + shortCode));
       if (!snapshot.exists()) exists = false;
@@ -147,6 +152,7 @@ async function startUnlock() {
     status.innerText = "❌ 6 digit Short Code daalo!";
     return;
   }
+
   if (!pin) {
     status.style.color = "#dc2626";
     status.innerText = "❌ PIN daalo!";
@@ -158,6 +164,7 @@ async function startUnlock() {
 
   try {
     const snapshot = await get(child(ref(db), "files/" + code));
+
     if (!snapshot.exists()) {
       status.style.color = "#dc2626";
       status.innerText = "❌ Invalid Short Code!";
@@ -194,6 +201,8 @@ async function startUnlock() {
 // ====================== MAKE FUNCTIONS GLOBAL ======================
 window.startUpload = startUpload;
 window.startUnlock = startUnlock;
+
+// ====================== LIVE P2P SYSTEM ======================
 let peerConn = null;
 let dataChannel = null;
 let currentRoomRef = null;
@@ -202,7 +211,7 @@ let incomingChunks = [];
 let receivedBytes = 0;
 
 const rtcConfig = {
-  iceServers: [{ urls: "stun:://google.com" }]
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
 };
 
 function appendP2PLog(sender, text) {
@@ -233,13 +242,16 @@ function setupDataChannel(channel) {
   dataChannel.onmessage = (e) => {
     if (typeof e.data === "string") {
       const msg = JSON.parse(e.data);
+
       if (msg.type === "chat") {
         appendP2PLog("Peer", msg.text);
+
       } else if (msg.type === "file-meta") {
         incomingFileMeta = msg;
         incomingChunks = [];
         receivedBytes = 0;
         appendP2PLog("System", `Receiving "${msg.name}" (${(msg.size / (1024 * 1024)).toFixed(2)} MB)...`);
+
       } else if (msg.type === "file-end" && incomingFileMeta) {
         const blob = new Blob(incomingChunks, { type: incomingFileMeta.mime });
         const url = URL.createObjectURL(blob);
@@ -252,6 +264,7 @@ function setupDataChannel(channel) {
         appendP2PLog("System", `✅ "${incomingFileMeta.name}" downloaded!`);
         incomingFileMeta = null;
       }
+
     } else if (incomingFileMeta) {
       incomingChunks.push(e.data);
       receivedBytes += e.data.byteLength;
@@ -264,7 +277,9 @@ function setupDataChannel(channel) {
 function waitForIceGathering(pc) {
   return new Promise(resolve => {
     if (pc.iceGatheringState === "complete") return resolve();
+
     const timer = setTimeout(resolve, 2000);
+
     pc.onicegatheringstatechange = () => {
       if (pc.iceGatheringState === "complete") {
         clearTimeout(timer);
@@ -274,8 +289,10 @@ function waitForIceGathering(pc) {
   });
 }
 
+// ====================== CREATE LIVE ROOM ======================
 async function createP2PRoom() {
   const status = document.getElementById("p2p-status");
+
   try {
     status.style.color = "#047857";
     status.innerText = "⏳ Creating Live Room...";
@@ -290,7 +307,10 @@ async function createP2PRoom() {
     await peerConn.setLocalDescription(offer);
     await waitForIceGathering(peerConn);
 
-    await set(currentRoomRef, { offer: JSON.stringify(peerConn.localDescription) });
+    await set(currentRoomRef, {
+      offer: JSON.stringify(peerConn.localDescription)
+    });
+
     status.style.color = "#059669";
     status.innerText = `✅ Room Created! Share Code: [ ${roomCode} ] — Waiting for friend...`;
 
@@ -300,15 +320,18 @@ async function createP2PRoom() {
         await peerConn.setRemoteDescription(new RTCSessionDescription(answer));
       }
     });
+
   } catch (err) {
     status.style.color = "#dc2626";
     status.innerText = "❌ Error: " + err.message;
   }
 }
 
+// ====================== JOIN LIVE ROOM ======================
 async function joinP2PRoom() {
   const code = document.getElementById("p2p-room-input").value.trim();
   const status = document.getElementById("p2p-status");
+
   if (code.length !== 4) {
     status.style.color = "#dc2626";
     status.innerText = "❌ Enter valid 4-digit Room Code!";
@@ -321,6 +344,7 @@ async function joinP2PRoom() {
 
     currentRoomRef = ref(db, "p2p_rooms/" + code);
     const snap = await get(currentRoomRef);
+
     if (!snap.exists() || !snap.val().offer) {
       status.style.color = "#dc2626";
       status.innerText = "❌ Room not found or expired!";
@@ -328,6 +352,7 @@ async function joinP2PRoom() {
     }
 
     status.innerText = "⏳ Connecting directly to peer...";
+
     peerConn = new RTCPeerConnection(rtcConfig);
     peerConn.ondatachannel = (e) => setupDataChannel(e.channel);
 
@@ -339,29 +364,41 @@ async function joinP2PRoom() {
     await waitForIceGathering(peerConn);
 
     await set(child(currentRoomRef, "answer"), JSON.stringify(peerConn.localDescription));
+
   } catch (err) {
     status.style.color = "#dc2626";
     status.innerText = "❌ Connection Error: " + err.message;
   }
 }
 
-
+// ====================== SEND MESSAGE ======================
 function sendP2PMessage() {
   const input = document.getElementById("p2p-msg-input");
   const text = input.value.trim();
+
   if (!text || !dataChannel || dataChannel.readyState !== "open") return;
+
   dataChannel.send(JSON.stringify({ type: "chat", text: text }));
   appendP2PLog("You", text);
   input.value = "";
 }
 
+// ====================== SEND FILE ======================
 async function sendP2PFile() {
   const fileInput = document.getElementById("p2p-file-input");
   const prog = document.getElementById("p2p-transfer-progress");
+
   if (!fileInput.files.length || !dataChannel || dataChannel.readyState !== "open") return;
 
   const file = fileInput.files.item(0);
-  dataChannel.send(JSON.stringify({ type: "file-meta", name: file.name, size: file.size, mime: file.type }));
+
+  dataChannel.send(JSON.stringify({
+    type: "file-meta",
+    name: file.name,
+    size: file.size,
+    mime: file.type
+  }));
+
   appendP2PLog("You", `Sending "${file.name}"...`);
 
   const chunkSize = 65536;
@@ -373,9 +410,11 @@ async function sendP2PFile() {
       await new Promise(r => setTimeout(r, 50));
       continue;
     }
+
     const slice = buffer.slice(offset, offset + chunkSize);
     dataChannel.send(slice);
     offset += chunkSize;
+
     const pct = Math.min(100, Math.round((offset / buffer.byteLength) * 100));
     prog.style.color = "#047857";
     prog.innerText = `📤 Sending: ${pct}%`;
@@ -386,6 +425,7 @@ async function sendP2PFile() {
   prog.innerText = `✅ "${file.name}" Sent Successfully!`;
 }
 
+// ====================== MAKE P2P FUNCTIONS GLOBAL ======================
 window.createP2PRoom = createP2PRoom;
 window.joinP2PRoom = joinP2PRoom;
 window.sendP2PMessage = sendP2PMessage;
