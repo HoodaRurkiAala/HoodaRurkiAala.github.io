@@ -24,12 +24,12 @@ document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
 document.getElementById("myForm").action = "https://formsubmit.co/hoodarurkiaala@gmail.com";
 
-// ====================== VISITOR COUNTER (Fixed) ======================
-fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
+// ====================== VISITOR COUNTER (New Working) ======================
+fetch("https://countapi.mileshilliard.com/api/v1/hit/hoodarurkiaala-visits")
   .then(function(r) { return r.json(); })
   .then(function(d) {
-    if (d && d.count) {
-      document.getElementById("visitor-count").innerText = d.count;
+    if (d && d.value) {
+      document.getElementById("visitor-count").innerText = d.value;
     } else {
       document.getElementById("visitor-count").innerText = "—";
     }
