@@ -262,34 +262,49 @@ function setupDataChannel(channel) {
   };
 }
 
-async function createP2PRoom() {
-  const status = document.getElementById("p2p-status");
-  const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-  currentRoomRef = ref(db, "p2p_rooms/" + roomCode);
-
-  peerConn = new RTCPeerConnection(rtcConfig);
-  setupDataChannel(peerConn.createDataChannel("hooda-p2p"));
-
-  const offer = await peerConn.createOffer();
-  await peerConn.setLocalDescription(offer);
-
-  await new Promise(resolve => {
-    if (peerConn.iceGatheringState === "complete") resolve();
-    else peerConn.onicegatheringstatechange = () => {
-      if (peerConn.iceGatheringState === "complete") resolve();
+function waitForIceGathering(pc) {
+  return new Promise(resolve => {
+    if (pc.iceGatheringState === "complete") return resolve();
+    const timer = setTimeout(resolve, 2000);
+    pc.onicegatheringstatechange = () => {
+      if (pc.iceGatheringState === "complete") {
+        clearTimeout(timer);
+        resolve();
+      }
     };
   });
+}
 
-  await set(currentRoomRef, { offer: JSON.stringify(peerConn.localDescription) });
-  status.style.color = "#047857";
-  status.innerText = `⏳ Room Created! Share Code: [ ${roomCode} ] — Waiting for friend to join...`;
+async function createP2PRoom() {
+  const status = document.getElementById("p2p-status");
+  try {
+    status.style.color = "#047857";
+    status.innerText = "⏳ Creating Live Room...";
 
-  onValue(child(currentRoomRef, "answer"), async (snap) => {
-    if (snap.exists() && !peerConn.currentRemoteDescription) {
-      const answer = JSON.parse(snap.val());
-      await peerConn.setRemoteDescription(new RTCSessionDescription(answer));
-    }
-  });
+    const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+    currentRoomRef = ref(db, "p2p_rooms/" + roomCode);
+
+    peerConn = new RTCPeerConnection(rtcConfig);
+    setupDataChannel(peerConn.createDataChannel("hooda-p2p"));
+
+    const offer = await peerConn.createOffer();
+    await peerConn.setLocalDescription(offer);
+    await waitForIceGathering(peerConn);
+
+    await set(currentRoomRef, { offer: JSON.stringify(peerConn.localDescription) });
+    status.style.color = "#059669";
+    status.innerText = `✅ Room Created! Share Code: [ ${roomCode} ] — Waiting for friend...`;
+
+    onValue(child(currentRoomRef, "answer"), async (snap) => {
+      if (snap.exists() && !peerConn.currentRemoteDescription) {
+        const answer = JSON.parse(snap.val());
+        await peerConn.setRemoteDescription(new RTCSessionDescription(answer));
+      }
+    });
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.innerText = "❌ Error: " + err.message;
+  }
 }
 
 async function joinP2PRoom() {
@@ -301,35 +316,36 @@ async function joinP2PRoom() {
     return;
   }
 
-  currentRoomRef = ref(db, "p2p_rooms/" + code);
-  const snap = await get(currentRoomRef);
-  if (!snap.exists() || !snap.val().offer) {
+  try {
+    status.style.color = "#047857";
+    status.innerText = "⏳ Searching Room...";
+
+    currentRoomRef = ref(db, "p2p_rooms/" + code);
+    const snap = await get(currentRoomRef);
+    if (!snap.exists() || !snap.val().offer) {
+      status.style.color = "#dc2626";
+      status.innerText = "❌ Room not found or expired!";
+      return;
+    }
+
+    status.innerText = "⏳ Connecting directly to peer...";
+    peerConn = new RTCPeerConnection(rtcConfig);
+    peerConn.ondatachannel = (e) => setupDataChannel(e.channel);
+
+    const offer = JSON.parse(snap.val().offer);
+    await peerConn.setRemoteDescription(new RTCSessionDescription(offer));
+
+    const answer = await peerConn.createAnswer();
+    await peerConn.setLocalDescription(answer);
+    await waitForIceGathering(peerConn);
+
+    await set(child(currentRoomRef, "answer"), JSON.stringify(peerConn.localDescription));
+  } catch (err) {
     status.style.color = "#dc2626";
-    status.innerText = "❌ Room not found or expired!";
-    return;
+    status.innerText = "❌ Connection Error: " + err.message;
   }
-
-  status.style.color = "#047857";
-  status.innerText = "⏳ Connecting directly to peer...";
-
-  peerConn = new RTCPeerConnection(rtcConfig);
-  peerConn.ondatachannel = (e) => setupDataChannel(e.channel);
-
-  const offer = JSON.parse(snap.val().offer);
-  await peerConn.setRemoteDescription(new RTCSessionDescription(offer));
-
-  const answer = await peerConn.createAnswer();
-  await peerConn.setLocalDescription(answer);
-
-  await new Promise(resolve => {
-    if (peerConn.iceGatheringState === "complete") resolve();
-    else peerConn.onicegatheringstatechange = () => {
-      if (peerConn.iceGatheringState === "complete") resolve();
-    };
-  });
-
-  await set(child(currentRoomRef, "answer"), JSON.stringify(peerConn.localDescription));
 }
+
 
 function sendP2PMessage() {
   const input = document.getElementById("p2p-msg-input");
