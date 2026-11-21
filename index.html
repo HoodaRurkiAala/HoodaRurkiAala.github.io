@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -329,6 +328,46 @@
                     <button type="button" onclick="sendP2PFile()" class="btn">⚡ Send File Directly</button>
                     <p id="p2p-transfer-progress" class="status-msg"></p>
                 </div>
+            </div>
+        </section>
+
+        <!-- ========== INTERNET SPEED TESTER ========== -->
+        <section id="internet-tester">
+            <h2>🌐 Live Internet Speed, Ping & IP Info Tester</h2>
+
+            <div class="vault-box">
+                <p style="color:#047857; margin-bottom:14px; font-size:0.95rem;">
+                    Real-time browser test using Cloudflare speed-test servers and public IP information.
+                </p>
+
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;">
+                    <div style="background:#fff; border:1px solid #a7f3d0; border-radius:8px; padding:14px;">
+                        <div style="color:#64748b; font-size:0.9rem;">Ping (HTTP latency)</div>
+                        <div id="net-ping" style="font-size:1.6rem; font-weight:bold; color:#047857;">-- ms</div>
+                    </div>
+
+                    <div style="background:#fff; border:1px solid #a7f3d0; border-radius:8px; padding:14px;">
+                        <div style="color:#64748b; font-size:0.9rem;">Download Speed</div>
+                        <div id="net-download" style="font-size:1.6rem; font-weight:bold; color:#047857;">-- Mbps</div>
+                    </div>
+                </div>
+
+                <div style="background:#fff; border:1px solid #a7f3d0; border-radius:8px; padding:14px; margin-bottom:12px;">
+                    <div style="font-weight:bold; margin-bottom:8px;">Public Network Information</div>
+                    <p style="margin:5px 0;">Public IP: <strong id="net-ip">Loading...</strong></p>
+                    <p style="margin:5px 0;">ISP / Organization: <strong id="net-isp">Loading...</strong></p>
+                    <p style="margin:5px 0;">Location: <strong id="net-location">Loading...</strong></p>
+                </div>
+
+                <button type="button" class="btn" id="net-test-btn" onclick="runInternetTest()">▶ Run Internet Speed Test</button>
+
+                <p id="net-status" class="status-msg" aria-live="polite">
+                    Ready. Click the button to start a real test.
+                </p>
+
+                <p style="font-size:0.82rem; color:#64748b; margin-top:8px;">
+                    Note: Ping is measured as HTTP response latency, not ICMP ping. Download speed depends on your connection, device, and browser.
+                </p>
             </div>
         </section>
 
