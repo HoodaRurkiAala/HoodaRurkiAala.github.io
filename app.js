@@ -24,14 +24,18 @@ document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
 document.getElementById("myForm").action = "https://formsubmit.co/hoodarurkiaala@gmail.com";
 
-// Visitor Counter
+// ====================== VISITOR COUNTER (Fixed) ======================
 fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
-  .then(r => r.json())
-  .then(d => { if (d && d.count) document.getElementById("visitor-count").innerText = d.count; })
-  .catch(() => {
-    let c = parseInt(localStorage.getItem("hooda_visits") || "1") + 1;
-    localStorage.setItem("hooda_visits", c);
-    document.getElementById("visitor-count").innerText = c;
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d && d.count) {
+      document.getElementById("visitor-count").innerText = d.count;
+    } else {
+      document.getElementById("visitor-count").innerText = "—";
+    }
+  })
+  .catch(function() {
+    document.getElementById("visitor-count").innerText = "—";
   });
 
 // ====================== HELPERS ======================
@@ -187,6 +191,7 @@ async function startUnlock() {
     status.innerText = "❌ Incorrect PIN or Code!";
   }
 }
-// Make functions global so onclick can use them
+
+// ====================== MAKE FUNCTIONS GLOBAL ======================
 window.startUpload = startUpload;
 window.startUnlock = startUnlock;
