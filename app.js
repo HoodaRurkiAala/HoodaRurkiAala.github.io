@@ -24,7 +24,7 @@ document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
 document.getElementById("myForm").action = "https://formsubmit.co/hoodarurkiaala@gmail.com";
 
-// ====================== VISITOR COUNTER ======================
+// ====================== VISITOR COUNTER (Fixed) ======================
 fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
   .then(function(r) { return r.json(); })
   .then(function(d) {
@@ -37,6 +37,7 @@ fetch("https://api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
   .catch(function() {
     document.getElementById("visitor-count").innerText = "—";
   });
+
 // ====================== HELPERS ======================
 function xorText(str, pin) {
   let out = "";
@@ -190,6 +191,7 @@ async function startUnlock() {
     status.innerText = "❌ Incorrect PIN or Code!";
   }
 }
-// Make functions global so onclick can use them
+
+// ====================== MAKE FUNCTIONS GLOBAL ======================
 window.startUpload = startUpload;
 window.startUnlock = startUnlock;
