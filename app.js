@@ -37,7 +37,6 @@ fetch("https://countapi.mileshilliard.com/api/v1/hit/hoodarurkiaala-visits")
   .catch(function() {
     document.getElementById("visitor-count").innerText = "—";
   });
-
 // ====================== HELPERS ======================
 function xorText(str, pin) {
   let out = "";
