@@ -12,7 +12,8 @@ const firebaseConfig = {
 
 // Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import { getDatabase, ref, set, get, child, push, remove, onValue } from "https://gstatic.com";
+/firebasejs/11.0.2/firebase-database.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -194,3 +195,183 @@ async function startUnlock() {
 // ====================== MAKE FUNCTIONS GLOBAL ======================
 window.startUpload = startUpload;
 window.startUnlock = startUnlock;
+let peerConn = null;
+let dataChannel = null;
+let currentRoomRef = null;
+let incomingFileMeta = null;
+let incomingChunks = [];
+let receivedBytes = 0;
+
+const rtcConfig = {
+  iceServers: [{ urls: "stun:://google.com" }]
+};
+
+function appendP2PLog(sender, text) {
+  const log = document.getElementById("p2p-chat-log");
+  const div = document.createElement("div");
+  div.style.marginBottom = "6px";
+  div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setupDataChannel(channel) {
+  dataChannel = channel;
+  dataChannel.binaryType = "arraybuffer";
+
+  dataChannel.onopen = () => {
+    document.getElementById("p2p-status").style.color = "#059669";
+    document.getElementById("p2p-status").innerText = "🟢 Connected Live (Peer-to-Peer)!";
+    document.getElementById("p2p-room-box").style.display = "block";
+    if (currentRoomRef) remove(currentRoomRef);
+  };
+
+  dataChannel.onclose = () => {
+    document.getElementById("p2p-status").style.color = "#dc2626";
+    document.getElementById("p2p-status").innerText = "🔴 Peer Disconnected.";
+  };
+
+  dataChannel.onmessage = (e) => {
+    if (typeof e.data === "string") {
+      const msg = JSON.parse(e.data);
+      if (msg.type === "chat") {
+        appendP2PLog("Peer", msg.text);
+      } else if (msg.type === "file-meta") {
+        incomingFileMeta = msg;
+        incomingChunks = [];
+        receivedBytes = 0;
+        appendP2PLog("System", `Receiving "${msg.name}" (${(msg.size / (1024 * 1024)).toFixed(2)} MB)...`);
+      } else if (msg.type === "file-end" && incomingFileMeta) {
+        const blob = new Blob(incomingChunks, { type: incomingFileMeta.mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = incomingFileMeta.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        appendP2PLog("System", `✅ "${incomingFileMeta.name}" downloaded!`);
+        incomingFileMeta = null;
+      }
+    } else if (incomingFileMeta) {
+      incomingChunks.push(e.data);
+      receivedBytes += e.data.byteLength;
+      const pct = Math.round((receivedBytes / incomingFileMeta.size) * 100);
+      document.getElementById("p2p-transfer-progress").innerText = `📥 Receiving: ${pct}%`;
+    }
+  };
+}
+
+async function createP2PRoom() {
+  const status = document.getElementById("p2p-status");
+  const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+  currentRoomRef = ref(db, "p2p_rooms/" + roomCode);
+
+  peerConn = new RTCPeerConnection(rtcConfig);
+  setupDataChannel(peerConn.createDataChannel("hooda-p2p"));
+
+  const offer = await peerConn.createOffer();
+  await peerConn.setLocalDescription(offer);
+
+  await new Promise(resolve => {
+    if (peerConn.iceGatheringState === "complete") resolve();
+    else peerConn.onicegatheringstatechange = () => {
+      if (peerConn.iceGatheringState === "complete") resolve();
+    };
+  });
+
+  await set(currentRoomRef, { offer: JSON.stringify(peerConn.localDescription) });
+  status.style.color = "#047857";
+  status.innerText = `⏳ Room Created! Share Code: [ ${roomCode} ] — Waiting for friend to join...`;
+
+  onValue(child(currentRoomRef, "answer"), async (snap) => {
+    if (snap.exists() && !peerConn.currentRemoteDescription) {
+      const answer = JSON.parse(snap.val());
+      await peerConn.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+  });
+}
+
+async function joinP2PRoom() {
+  const code = document.getElementById("p2p-room-input").value.trim();
+  const status = document.getElementById("p2p-status");
+  if (code.length !== 4) {
+    status.style.color = "#dc2626";
+    status.innerText = "❌ Enter valid 4-digit Room Code!";
+    return;
+  }
+
+  currentRoomRef = ref(db, "p2p_rooms/" + code);
+  const snap = await get(currentRoomRef);
+  if (!snap.exists() || !snap.val().offer) {
+    status.style.color = "#dc2626";
+    status.innerText = "❌ Room not found or expired!";
+    return;
+  }
+
+  status.style.color = "#047857";
+  status.innerText = "⏳ Connecting directly to peer...";
+
+  peerConn = new RTCPeerConnection(rtcConfig);
+  peerConn.ondatachannel = (e) => setupDataChannel(e.channel);
+
+  const offer = JSON.parse(snap.val().offer);
+  await peerConn.setRemoteDescription(new RTCSessionDescription(offer));
+
+  const answer = await peerConn.createAnswer();
+  await peerConn.setLocalDescription(answer);
+
+  await new Promise(resolve => {
+    if (peerConn.iceGatheringState === "complete") resolve();
+    else peerConn.onicegatheringstatechange = () => {
+      if (peerConn.iceGatheringState === "complete") resolve();
+    };
+  });
+
+  await set(child(currentRoomRef, "answer"), JSON.stringify(peerConn.localDescription));
+}
+
+function sendP2PMessage() {
+  const input = document.getElementById("p2p-msg-input");
+  const text = input.value.trim();
+  if (!text || !dataChannel || dataChannel.readyState !== "open") return;
+  dataChannel.send(JSON.stringify({ type: "chat", text: text }));
+  appendP2PLog("You", text);
+  input.value = "";
+}
+
+async function sendP2PFile() {
+  const fileInput = document.getElementById("p2p-file-input");
+  const prog = document.getElementById("p2p-transfer-progress");
+  if (!fileInput.files.length || !dataChannel || dataChannel.readyState !== "open") return;
+
+  const file = fileInput.files.item(0);
+  dataChannel.send(JSON.stringify({ type: "file-meta", name: file.name, size: file.size, mime: file.type }));
+  appendP2PLog("You", `Sending "${file.name}"...`);
+
+  const chunkSize = 65536;
+  let offset = 0;
+  const buffer = await file.arrayBuffer();
+
+  while (offset < buffer.byteLength) {
+    if (dataChannel.bufferedAmount > 8 * 1024 * 1024) {
+      await new Promise(r => setTimeout(r, 50));
+      continue;
+    }
+    const slice = buffer.slice(offset, offset + chunkSize);
+    dataChannel.send(slice);
+    offset += chunkSize;
+    const pct = Math.min(100, Math.round((offset / buffer.byteLength) * 100));
+    prog.style.color = "#047857";
+    prog.innerText = `📤 Sending: ${pct}%`;
+  }
+
+  dataChannel.send(JSON.stringify({ type: "file-end" }));
+  prog.style.color = "#059669";
+  prog.innerText = `✅ "${file.name}" Sent Successfully!`;
+}
+
+window.createP2PRoom = createP2PRoom;
+window.joinP2PRoom = joinP2PRoom;
+window.sendP2PMessage = sendP2PMessage;
+window.sendP2PFile = sendP2PFile;
