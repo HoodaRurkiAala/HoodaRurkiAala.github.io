@@ -1,7 +1,6 @@
-
 // ====================== FIREBASE CONFIG ======================
 const firebaseConfig = {
-  apiKey: "AIzaSyCoB4-YeXJQ3P_AQS5F132yoU_55WreP3w",
+  apiKey: "AIzaSyCoB4-YeJXQ3P_AQS5F132yoU_55WreP3w",
   authDomain: "hoodarurkiaala1.firebaseapp.com",
   databaseURL: "https://hoodarurkiaala1-default-rtdb.firebaseio.com",
   projectId: "hoodarurkiaala1",
@@ -430,3 +429,170 @@ window.createP2PRoom = createP2PRoom;
 window.joinP2PRoom = joinP2PRoom;
 window.sendP2PMessage = sendP2PMessage;
 window.sendP2PFile = sendP2PFile;
+
+
+// ====================== LIVE INTERNET SPEED / PING / IP TESTER ======================
+const speedTestConfig = {
+  downloadBytes: 10000000,
+  pingRuns: 3
+};
+
+function setNetworkText(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value;
+}
+
+function setNetworkStatus(message, isError = false) {
+  const status = document.getElementById("net-status");
+  if (!status) return;
+  status.textContent = message;
+  status.style.color = isError ? "#dc2626" : "#047857";
+}
+
+async function loadPublicNetworkInfo() {
+  try {
+    const response = await fetch("https://ipapi.co/json/", {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`IP lookup failed (${response.status})`);
+    }
+
+    const info = await response.json();
+
+    setNetworkText("net-ip", info.ip || "Not available");
+    setNetworkText("net-isp", info.org || info.asn || "Not available");
+
+    const locationParts = [
+      info.city,
+      info.region,
+      info.country_name
+    ].filter(Boolean);
+
+    setNetworkText(
+      "net-location",
+      locationParts.length ? locationParts.join(", ") : "Not available"
+    );
+
+  } catch (error) {
+    setNetworkText("net-ip", "Unavailable");
+    setNetworkText("net-isp", "Unavailable");
+    setNetworkText("net-location", "IP lookup service unavailable");
+  }
+}
+
+async function measureHttpPing() {
+  const samples = [];
+
+  for (let i = 0; i < speedTestConfig.pingRuns; i++) {
+    const url = `https://speed.cloudflare.com/__down?bytes=0&cb=${Date.now()}-${i}`;
+    const start = performance.now();
+
+    const response = await fetch(url, {
+      cache: "no-store",
+      mode: "cors"
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ping request failed (${response.status})`);
+    }
+
+    await response.arrayBuffer();
+    samples.push(performance.now() - start);
+  }
+
+  samples.sort((a, b) => a - b);
+
+  return samples[Math.floor(samples.length / 2)];
+}
+
+async function measureRealDownloadSpeed() {
+  const url = `https://speed.cloudflare.com/__down?bytes=${speedTestConfig.downloadBytes}&cb=${Date.now()}`;
+  const start = performance.now();
+
+  const response = await fetch(url, {
+    cache: "no-store",
+    mode: "cors"
+  });
+
+  if (!response.ok) {
+    throw new Error(`Download test failed (${response.status})`);
+  }
+
+  let bytesReceived = 0;
+
+  if (response.body && response.body.getReader) {
+    const reader = response.body.getReader();
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      bytesReceived += value.byteLength;
+    }
+  } else {
+    const data = await response.arrayBuffer();
+    bytesReceived = data.byteLength;
+  }
+
+  const seconds = (performance.now() - start) / 1000;
+
+  if (!bytesReceived || seconds <= 0) {
+    throw new Error("No download data received.");
+  }
+
+  return (bytesReceived * 8) / seconds / 1000000;
+}
+
+async function runInternetTest() {
+  const button = document.getElementById("net-test-btn");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Testing...";
+  }
+
+  setNetworkText("net-ping", "Testing...");
+  setNetworkText("net-download", "Testing...");
+
+  setNetworkStatus(
+    "Measuring HTTP latency and downloading a real 10 MB test file..."
+  );
+
+  try {
+    const ping = await measureHttpPing();
+
+    setNetworkText("net-ping", `${Math.round(ping)} ms`);
+
+    const downloadMbps = await measureRealDownloadSpeed();
+
+    setNetworkText(
+      "net-download",
+      `${downloadMbps.toFixed(2)} Mbps`
+    );
+
+    setNetworkStatus("✅ Internet speed test completed successfully.");
+
+  } catch (error) {
+    setNetworkText("net-ping", "Failed");
+    setNetworkText("net-download", "Failed");
+
+    setNetworkStatus(
+      `Test could not be completed: ${error.message}. Check your connection or try again.`,
+      true
+    );
+
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "▶ Run Internet Speed Test";
+    }
+  }
+}
+
+window.runInternetTest = runInternetTest;
+
+// Page load par public IP details fetch karo
+loadPublicNetworkInfo();
