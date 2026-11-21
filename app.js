@@ -187,3 +187,6 @@ async function startUnlock() {
     status.innerText = "❌ Incorrect PIN or Code!";
   }
 }
+// Make functions global so onclick can use them
+window.startUpload = startUpload;
+window.startUnlock = startUnlock;
