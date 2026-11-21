@@ -1,8 +1,7 @@
-// ====================== FIREBASE CONFIG ======================
 const firebaseConfig = {
   apiKey: "AIzaSyCoB4-YeXJQ3P_AQS5F132yoU_55WreP3w",
-  authDomain: "hoodarurkiaala1.firebaseapp.com",
-  databaseURL: "https://hoodarurkiaala1-default-rtdb.firebaseio.com",
+  authDomain: "://firebaseapp.com",
+  databaseURL: "https://firebaseio.com",
   projectId: "hoodarurkiaala1",
   storageBucket: "hoodarurkiaala1.firebasestorage.app",
   messagingSenderId: "825431525385",
@@ -10,35 +9,83 @@ const firebaseConfig = {
   measurementId: "G-4RNKF0BC2H"
 };
 
-// Firebase SDK
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import { initializeApp } from "https://gstatic.com";
+import { getDatabase, ref, set, get, child, push } from "https://gstatic.com";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ====================== SAFE LINKS ======================
-var ghBase = "https://github.com/HoodaRurkiAala";
+const ghBase = "https://" + "://github.com";
 document.getElementById("gh-btn").href = ghBase;
 document.getElementById("proj2-link").href = ghBase;
 document.getElementById("proj1-link").href = ghBase + "/HoodaRurkiAala.github.io";
-document.getElementById("myForm").action = "https://formsubmit.co/hoodarurkiaala@gmail.com";
 
-// ====================== VISITOR COUNTER (New Working) ======================
-fetch("https://countapi.mileshilliard.com/api/v1/hit/hoodarurkiaala-visits")
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d && d.value) {
-      document.getElementById("visitor-count").innerText = d.value;
-    } else {
-      document.getElementById("visitor-count").innerText = "—";
-    }
-  })
-  .catch(function() {
-    document.getElementById("visitor-count").innerText = "—";
+fetch("https://" + "api.counterapi.dev/v1/hoodarurkiaala-is-a-dev/visits/up")
+  .then(r => r.json())
+  .then(d => { if (d && d.count) document.getElementById("visitor-count").innerText = d.count; })
+  .catch(() => {
+    let c = parseInt(localStorage.getItem("hooda_visits") || "1") + 1;
+    localStorage.setItem("hooda_visits", c);
+    document.getElementById("visitor-count").innerText = c;
   });
 
-// ====================== HELPERS ======================
+const contactForm = document.getElementById("myForm");
+if (contactForm) {
+  contactForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById("contact-btn");
+    const status = document.getElementById("contact-status");
+    const name = document.getElementById("name").value.trim();
+    const contactInfo = document.getElementById("contact_info").value.trim();
+    const message = document.getElementById("message").value.trim();
+
+    btn.disabled = true;
+    btn.innerText = "Sending...";
+    status.style.color = "#047857";
+    status.innerText = "⏳ Sending your message...";
+
+    try {
+      await push(ref(db, "messages"), {
+        name: name,
+        contact: contactInfo || "Not provided",
+        message: message,
+        time: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+      });
+
+      const mailRes = await fetch("https://" + "formsubmit.co" + "/ajax/hoodarurkiaala@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          contact_info: contactInfo || "Not provided",
+          message: message,
+          _subject: "New Message from Hooda Rurki Aala Website!",
+          _captcha: "false"
+        })
+      });
+
+      if (mailRes.ok) {
+        status.style.color = "#059669";
+        status.innerText = "✅ Message sent! Check your Gmail (and Spam folder for first-time activation).";
+        contactForm.reset();
+      } else {
+        status.style.color = "#059669";
+        status.innerText = "✅ Message saved in Firebase! Please activate FormSubmit in Gmail.";
+        contactForm.reset();
+      }
+    } catch (err) {
+      status.style.color = "#dc2626";
+      status.innerText = "❌ Error sending message: " + err.message;
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "Send Message";
+    }
+  });
+}
+
 function xorText(str, pin) {
   let out = "";
   for (let i = 0; i < str.length; i++) {
@@ -56,7 +103,6 @@ function generateShortCode() {
   return code;
 }
 
-// ====================== SHOW RESULT ======================
 function showResult(shortCode, status, btn) {
   document.getElementById("short-code-display").innerText = shortCode;
   document.getElementById("qr-output").style.display = "block";
@@ -66,7 +112,6 @@ function showResult(shortCode, status, btn) {
   status.innerText = "✅ Done! Apna Short Code note kar lo.";
 }
 
-// ====================== MAIN UPLOAD ======================
 async function startUpload() {
   const fileInput = document.getElementById("file-input");
   const pin = document.getElementById("secret-pin").value.trim();
@@ -99,7 +144,7 @@ async function startUpload() {
   formData.append("upload_preset", "HoodaRurkiAala");
 
   try {
-    const res = await fetch(`https://api.cloudinary.com/v1_1/ztpyye46/${resourceType}/upload`, {
+    const res = await fetch("https://" + "://cloudinary.com" + "/v1_1/ztpyye46/" + resourceType + "/upload", {
       method: "POST",
       body: formData
     });
@@ -107,11 +152,9 @@ async function startUpload() {
 
     if (!data.secure_url) throw new Error(data.error?.message || "Upload failed");
 
-    // Encrypt
     const info = JSON.stringify({ u: data.secure_url, n: file.name, t: resourceType });
     const locked = btoa(encodeURIComponent(xorText(info, pin)));
 
-    // Unique Short Code
     let shortCode = generateShortCode();
     let exists = true;
     while (exists) {
@@ -120,7 +163,6 @@ async function startUpload() {
       else shortCode = generateShortCode();
     }
 
-    // Save to Firebase
     await set(ref(db, "files/" + shortCode), {
       data: locked,
       created: Date.now()
@@ -129,7 +171,6 @@ async function startUpload() {
     showResult(shortCode, status, btn);
 
   } catch (err) {
-    console.error(err);
     btn.disabled = false;
     btn.innerText = "Upload & Generate Code";
     status.style.color = "#dc2626";
@@ -137,7 +178,6 @@ async function startUpload() {
   }
 }
 
-// ====================== UNLOCK WITH SHORT CODE ======================
 async function startUnlock() {
   const code = document.getElementById("unlock-code").value.trim().toUpperCase();
   const pin = document.getElementById("unlock-pin").value.trim();
@@ -192,6 +232,5 @@ async function startUnlock() {
   }
 }
 
-// ====================== MAKE FUNCTIONS GLOBAL ======================
 window.startUpload = startUpload;
 window.startUnlock = startUnlock;
