@@ -596,3 +596,82 @@ window.runInternetTest = runInternetTest;
 
 // Page load par public IP details fetch karo
 loadPublicNetworkInfo();
+// ====================== INTERNET SPEED TEST ======================
+async function startSpeedTest() {
+  const btn = document.getElementById("start-speedtest");
+  const status = document.getElementById("speed-status");
+  const speedValue = document.getElementById("speed-value");
+  const dlEl = document.getElementById("dl-speed");
+  const ulEl = document.getElementById("ul-speed");
+  const pingEl = document.getElementById("ping-value");
+  const gauge = document.getElementById("speed-gauge");
+
+  btn.disabled = true;
+  btn.innerText = "Testing...";
+  status.style.color = "#047857";
+  status.innerText = "⏳ Measuring Ping...";
+  speedValue.innerText = "0";
+  dlEl.innerText = "—";
+  ulEl.innerText = "—";
+  pingEl.innerText = "—";
+
+  try {
+    // 1. PING TEST
+    const pingTimes = [];
+    for (let i = 0; i < 5; i++) {
+      const start = performance.now();
+      await fetch("https://www.cloudflare.com/cdn-cgi/trace", { cache: "no-store", mode: "cors" });
+      pingTimes.push(performance.now() - start);
+    }
+    const ping = Math.round(pingTimes.reduce((a, b) => a + b) / pingTimes.length);
+    pingEl.innerText = ping + " ms";
+
+    // 2. DOWNLOAD TEST
+    status.innerText = "⏳ Measuring Download Speed...";
+    const fileSize = 5 * 1024 * 1024; // 5 MB
+    const testUrl = "https://speed.cloudflare.com/__down?bytes=" + fileSize;
+
+    const dlStart = performance.now();
+    const response = await fetch(testUrl, { cache: "no-store" });
+    const blob = await response.blob();
+    const dlTime = (performance.now() - dlStart) / 1000; // seconds
+    const dlSpeed = ((blob.size * 8) / dlTime / 1000000).toFixed(1); // Mbps
+
+    dlEl.innerText = dlSpeed + " Mbps";
+    speedValue.innerText = dlSpeed;
+
+    // Update gauge (max 100 Mbps visual)
+    const deg = Math.min((dlSpeed / 100) * 360, 360);
+    gauge.style.background = `conic-gradient(#059669 ${deg}deg, #d1fae5 ${deg}deg)`;
+
+    // 3. UPLOAD TEST (approximate)
+    status.innerText = "⏳ Measuring Upload Speed...";
+    const uploadData = new Blob([new ArrayBuffer(1 * 1024 * 1024)]); // 1 MB
+    const ulStart = performance.now();
+    
+    await fetch("https://speed.cloudflare.com/__up", {
+      method: "POST",
+      body: uploadData,
+      cache: "no-store"
+    });
+    
+    const ulTime = (performance.now() - ulStart) / 1000;
+    const ulSpeed = ((uploadData.size * 8) / ulTime / 1000000).toFixed(1);
+
+    ulEl.innerText = ulSpeed + " Mbps";
+
+    status.style.color = "#059669";
+    status.innerText = "✅ Speed Test Complete!";
+    
+  } catch (err) {
+    console.error(err);
+    status.style.color = "#dc2626";
+    status.innerText = "❌ Test failed. Check your connection.";
+  }
+
+  btn.disabled = false;
+  btn.innerText = "Start Speed Test";
+}
+
+// Make global
+window.startSpeedTest = startSpeedTest;
